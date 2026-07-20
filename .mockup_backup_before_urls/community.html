@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Community — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-nav:10; --z-sticky:20; --z-overlay:40; --z-modal:45; --z-toast:60; --safe-bottom:env(safe-area-inset-bottom,0px); }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; display:flex; flex-direction:column; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; z-index:5; pointer-events:none;}
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; flex:1; overflow-y:auto; scrollbar-width:none; display:flex; flex-direction:column; min-height:0; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; justify-content:space-between; height:56px; padding:0 16px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:19px; font-weight:800; margin:0; }
+  .iconbtn{ width:38px; height:38px; border-radius:50%; border:none; background:var(--red); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  .content-scroll{ flex:1; overflow-y:auto; padding:14px 16px; }
+  p{ margin:0; line-height:1.5; color:var(--text-muted); font-size:13px; }
+  .board-row{ display:flex; gap:8px; overflow-x:auto; padding-bottom:14px; scrollbar-width:none; }
+  .board-row::-webkit-scrollbar{ display:none; }
+  .board-chip{ flex-shrink:0; padding:9px 14px; border-radius:20px; background:var(--surface-2); border:1px solid var(--border-strong); font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; white-space:nowrap; }
+  .board-chip.active{ background:var(--red); border-color:var(--red); color:#fff; }
+  .post-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:14px; margin-bottom:10px; cursor:pointer; display:flex; gap:10px; }
+  .post-avatar{ width:34px; height:34px; border-radius:10px; background:var(--red); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:12px; flex-shrink:0; position:relative; overflow:hidden; }
+  .avatar-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:1; }
+  .post-body{ flex:1; min-width:0; }
+  .post-top{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-faint); margin-bottom:6px; }
+  .post-title{ font-size:14px; font-weight:700; line-height:1.4; margin-bottom:8px; }
+  .post-meta{ display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-muted); }
+  .post-meta svg{ width:14px; height:14px; }
+  .empty{ text-align:center; padding:40px 20px; color:var(--text-faint); font-size:13px; }
+  .tabbar{ position:sticky; bottom:0; z-index:var(--z-nav); display:flex; background:rgba(20,20,21,.92); backdrop-filter:blur(16px); border-top:1px solid var(--border); padding:6px 4px calc(6px + var(--safe-bottom)); }
+  .tabbar a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; color:var(--text-faint); font-size:10px; font-weight:600; border-radius:12px; cursor:pointer; }
+  .tabbar a.active{ color:var(--red); }
+  .tabbar svg{ width:22px; height:22px; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:70px; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+  .overlay{ position:absolute; inset:0; background:rgba(0,0,0,.6); z-index:var(--z-overlay); display:none; align-items:flex-end; }
+  .overlay.show{ display:flex; }
+  .sheet{ width:100%; background:var(--surface); border-radius:22px 22px 0 0; padding:10px 20px calc(20px + var(--safe-bottom)); z-index:var(--z-modal); }
+  .sheet-handle{ width:36px; height:4px; border-radius:3px; background:var(--border-strong); margin:6px auto 14px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+  .field select, .field textarea{ width:100%; border-radius:12px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); padding:12px 14px; font-size:15px; font-family:inherit; }
+  .field select{ height:46px; padding:0 14px; }
+  .field textarea{ resize:vertical; line-height:1.5; }
+  .btn{ height:46px; border-radius:12px; border:none; font-size:14px; font-weight:700; cursor:pointer; width:100%; background:var(--red); color:#fff; }
+  .btn:active{ transform:scale(.97); } .btn[disabled]{ opacity:.5; pointer-events:none; }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <h1>Community</h1>
+      <button class="iconbtn" onclick="openComposer()" aria-label="New Post"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+    <div class="content-scroll">
+      <div class="board-row" id="board-row"></div>
+      <div id="posts"></div>
+    </div>
+    <div class="tabbar">
+      <a onclick="location.href='comedian-dashboard.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg><span>Dashboard</span></a>
+      <a onclick="location.href='analytics.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="3.5" height="8"/><rect x="10.25" y="6" width="3.5" height="14"/><rect x="16.5" y="9" width="3.5" height="11"/></svg><span>Analytics</span></a>
+      <a class="active" onclick="location.href='community.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg><span>Community</span></a>
+      <a onclick="location.href='events.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Events</span></a>
+      <a onclick="location.href='comedian-account.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><span>Account</span></a>
+    </div>
+  </div>
+
+  <div class="overlay" id="composer-overlay" onclick="if(event.target===this) closeComposer()">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h3 style="margin-bottom:12px;">New Post</h3>
+      <div class="field"><label>Board</label>
+        <select id="post-board" onchange="checkBoard()">
+          <option value="general">General Discussion</option>
+          <option value="collab">Collaboration</option>
+          <option value="workshop">Material Workshop</option>
+          <option value="news">Platform News</option>
+        </select>
+      </div>
+      <div class="field"><label>Post</label><textarea id="post-text" rows="3" placeholder="Share something with other comedians…"></textarea></div>
+      <p id="news-warning" style="display:none; color:var(--danger); margin-bottom:10px; font-size:12px; font-weight:600;">Platform News is admin-only. Comedians can read but not post here.</p>
+      <button class="btn" id="post-submit" onclick="submitPost()">Publish Post</button>
+    </div>
+  </div>
+
+  <div id="toast-wrap"></div>
+</div>
+<script>
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>', error:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 2800); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+const BOARDS = [ {id:'general', name:'General'}, {id:'collab', name:'Collaboration'}, {id:'workshop', name:'Workshop'}, {id:'news', name:'Platform News'} ];
+const POSTS = [
+  {id:'p1', board:'general', author:'Marcus Boone', time:'2h ago', title:'Anyone else bombing at 8pm slots lately?', replies:6},
+  {id:'p2', board:'collab', author:'Priya Shah', time:'5h ago', title:'Looking for a 2-person act for Austin showcase', replies:3},
+  {id:'p3', board:'workshop', author:'Ollie Chen', time:'1d ago', title:'New 5 min bit — roast it', replies:11},
+  {id:'p4', board:'news', author:'ComicTube Team', time:'2d ago', title:'Payout schedule confirmed for August', replies:0},
+  {id:'p5', board:'general', author:'Fatima Idris', time:'3d ago', title:'Best open mic rooms in Brooklyn right now?', replies:8}
+];
+let activeBoard = 'general';
+function renderBoards(){
+  document.getElementById('board-row').innerHTML = BOARDS.map(b => `<div class="board-chip ${b.id===activeBoard?'active':''}" onclick="setBoard('${b.id}')">${b.name}</div>`).join('');
+}
+function setBoard(id){ activeBoard = id; renderBoards(); renderPosts(); }
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+const AUTHOR_IMG = { 'Nina Volkov':47, 'Marcus Boone':13, 'Priya Shah':44, 'Deshawn Ruiz':14, 'Ollie Chen':15, 'Fatima Idris':48 };
+function authorPhoto(name){ return AUTHOR_IMG[name] ? `<img class="avatar-photo" src="https://i.pravatar.cc/100?img=${AUTHOR_IMG[name]}" alt="" onerror="this.remove()">` : ''; }
+function renderPosts(){
+  const list = POSTS.filter(p=>p.board===activeBoard);
+  const wrap = document.getElementById('posts');
+  if(!list.length){ wrap.innerHTML = '<div class="empty">No posts in this board yet.</div>'; return; }
+  wrap.innerHTML = list.map(p => `
+    <div class="post-card" onclick="location.href='post-detail.html?id=${p.id}'">
+      <div class="post-avatar">${initials(p.author)}${authorPhoto(p.author)}</div>
+      <div class="post-body">
+        <div class="post-top"><span>${p.author}</span><span>${p.time}</span></div>
+        <div class="post-title">${p.title}</div>
+        <div class="post-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H8l-4 4z"/></svg>${p.replies} replies</div>
+      </div>
+    </div>
+  `).join('');
+}
+function openComposer(){ document.getElementById('post-board').value = activeBoard; checkBoard(); document.getElementById('composer-overlay').classList.add('show'); }
+function closeComposer(){ document.getElementById('composer-overlay').classList.remove('show'); }
+function checkBoard(){
+  const isNews = document.getElementById('post-board').value === 'news';
+  document.getElementById('news-warning').style.display = isNews ? 'block' : 'none';
+  document.getElementById('post-submit').disabled = isNews;
+}
+function submitPost(){
+  const text = document.getElementById('post-text').value.trim();
+  if(!text){ ctToast('Write something before publishing.', 'error'); return; }
+  closeComposer();
+  ctToast('Post published to ' + BOARDS.find(b=>b.id===document.getElementById('post-board').value).name + '.', 'success');
+  document.getElementById('post-text').value = '';
+}
+renderBoards(); renderPosts();
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Discover — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --surface-3:#2E2E31; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-nav:10; --z-sticky:20; --z-overlay:40; --z-modal:45; --z-toast:60; --safe-bottom:env(safe-area-inset-bottom,0px); }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; display:flex; flex-direction:column; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; z-index:5; pointer-events:none;}
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; display:flex; flex-direction:column; min-height:0; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:8px; height:56px; padding:0 14px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar .brand{ font-weight:800; font-size:17px; flex:1; }
+  .iconbtn{ width:38px; height:38px; min-width:38px; border-radius:50%; border:none; background:var(--surface-2); color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  h2{ font-size:18px; font-weight:800; letter-spacing:-.2px; margin:0; } h3{font-size:15px;font-weight:700;margin:0;}
+  p{ margin:0; line-height:1.5; color:var(--text-muted); font-size:13px; }
+  .content-scroll{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .sec{ padding:16px 16px 4px; }
+  .sec-title{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .badge-mode{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:800; padding:5px 10px; border-radius:20px; cursor:pointer; text-transform:uppercase; letter-spacing:.3px; }
+  .badge-mode.kids{ background:rgba(52,199,89,.15); color:var(--green); }
+  .badge-mode.adult{ background:rgba(255,69,58,.15); color:var(--danger); }
+  .trend-row{ display:flex; gap:12px; overflow-x:auto; padding:2px 16px 14px; scrollbar-width:none; }
+  .trend-row::-webkit-scrollbar{ display:none; }
+  .trend-card{ flex:0 0 128px; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px; cursor:pointer; transition:border-color .15s ease; }
+  .trend-card:active{ transform:scale(.97); }
+  .trend-rank{ position:absolute; margin-top:-4px; margin-left:-4px; background:var(--red); color:#fff; font-size:10px; font-weight:800; border-radius:8px; padding:2px 6px; }
+  .trend-avatar{ width:64px; height:64px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:20px; color:#fff; margin-bottom:8px; position:relative; overflow:hidden; }
+  .avatar-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:1; }
+  .trend-name{ font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .trend-genre{ font-size:11px; color:var(--text-faint); }
+  .filter-bar{ display:flex; gap:8px; padding:2px 16px 12px; overflow-x:auto; scrollbar-width:none; }
+  .filter-bar::-webkit-scrollbar{ display:none; }
+  .chip{ flex-shrink:0; padding:8px 14px; border-radius:20px; background:var(--surface-2); border:1px solid var(--border-strong); font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; white-space:nowrap; transition:all .15s ease; }
+  .chip.active{ background:var(--red); border-color:var(--red); color:#fff; }
+  .chip.filter-trigger{ background:transparent; border-style:dashed; color:var(--red); display:flex; align-items:center; gap:5px; }
+  .list-card{ display:flex; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px; margin:0 16px 10px; cursor:pointer; align-items:center; }
+  .list-card:active{ transform:scale(.98); }
+  .list-avatar{ width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:#fff; flex-shrink:0; position:relative; overflow:hidden; }
+  .list-body{ flex:1; min-width:0; }
+  .list-top{ display:flex; align-items:center; gap:6px; }
+  .list-name{ font-weight:700; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .list-meta{ font-size:12px; color:var(--text-faint); margin-top:2px; }
+  .list-stats{ font-size:11px; color:var(--green); font-weight:700; margin-top:4px; }
+  .list-actions{ display:flex; flex-direction:column; gap:6px; }
+  .mini-btn{ width:34px; height:34px; border-radius:10px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text-muted); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .mini-btn.on{ background:rgba(204,0,0,.15); border-color:var(--red); color:var(--red); }
+  .tabbar{ position:sticky; bottom:0; z-index:var(--z-nav); display:flex; background:rgba(20,20,21,.92); backdrop-filter:blur(16px); border-top:1px solid var(--border); padding:6px 4px calc(6px + var(--safe-bottom)); }
+  .tabbar a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; color:var(--text-faint); font-size:10px; font-weight:600; border-radius:12px; cursor:pointer; }
+  .tabbar a.active{ color:var(--red); }
+  .tabbar svg{ width:22px; height:22px; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:70px; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+  .overlay{ position:absolute; inset:0; background:rgba(0,0,0,.55); z-index:var(--z-overlay); display:none; justify-content:flex-end; }
+  .overlay.show{ display:flex; }
+  .filter-panel{ width:82%; max-width:320px; height:100%; background:var(--surface); border-left:1px solid var(--border); padding:18px; z-index:var(--z-modal); animation:slide-in .22s ease; overflow-y:auto; }
+  @keyframes slide-in{ from{ transform:translateX(20px); opacity:.5;} to{ transform:translateX(0); opacity:1;} }
+  .fp-group{ margin-bottom:20px; }
+  .fp-title{ font-size:11.5px; font-weight:800; color:var(--text-faint); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+  .fp-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <div class="brand">ComicTube</div>
+      <span class="badge-mode adult" id="mode-badge" onclick="location.href='account.html'">Adult</span>
+      <button class="iconbtn" aria-label="Search" onclick="ctToast('Search is a mock action in this prototype.','success')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg>
+      </button>
+    </div>
+
+    <div class="content-scroll">
+      <div class="sec">
+        <div class="sec-title"><h2>Trending Now</h2><p>Last 7 days</p></div>
+      </div>
+      <div class="trend-row" id="trend-row"></div>
+
+      <div class="sec"><h2>Discover</h2></div>
+      <div class="filter-bar" id="genre-chips"></div>
+
+      <div class="sec" style="padding-top:4px;"><p style="font-weight:700; color:var(--text-faint); font-size:11.5px; text-transform:uppercase; letter-spacing:.5px;">Ranked by engagement rate</p></div>
+      <div id="ranked-list" style="padding-bottom:14px;"></div>
+    </div>
+
+    <div class="tabbar">
+      <a class="active" onclick="location.href='discover.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z"/></svg><span>Discover</span></a>
+      <a onclick="location.href='events.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Events</span></a>
+      <a onclick="location.href='rooms.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg><span>Rooms</span></a>
+      <a onclick="location.href='saved.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span>Saved</span></a>
+      <a onclick="location.href='account.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><span>Account</span></a>
+    </div>
+  </div>
+
+  <div class="overlay" id="filter-overlay" onclick="if(event.target===this) closeFilters()">
+    <div class="filter-panel">
+      <h2 style="margin-bottom:16px;">Filters</h2>
+      <div class="fp-group">
+        <div class="fp-title">Genre</div>
+        <div class="fp-chips" id="fp-genres"></div>
+      </div>
+      <div class="fp-group">
+        <div class="fp-title">City</div>
+        <input id="fp-city" placeholder="e.g. Los Angeles" style="width:100%; height:44px; border-radius:10px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); padding:0 12px; font-size:14px;">
+      </div>
+      <button class="chip" style="width:100%; text-align:center; margin-bottom:8px; background:var(--red); color:#fff; border-color:var(--red);" onclick="applyFilters()">Apply Filters</button>
+      <button class="chip" style="width:100%; text-align:center; background:transparent;" onclick="resetFilters()">Reset</button>
+    </div>
+  </div>
+
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctSetState(patch){ const cur = ctGetState(); const next = Object.assign({}, cur, patch); localStorage.setItem(CT_KEY, JSON.stringify(next)); return next; }
+function ctSetFan(patch){ const s = ctGetState(); s.fan = Object.assign({}, s.fan, patch); ctSetState(s); }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>', error:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 2600); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+const COMEDIANS = [
+  {id:'c1', name:'Nina Volkov', genre:'Stand-Up', city:'Los Angeles, CA', color:'#CC0000', rank:1, engagement:0.87, views7d:45, followers:1247, img:47},
+  {id:'c2', name:'Marcus Boone', genre:'Improv', city:'Chicago, IL', color:'#0A84FF', rank:2, engagement:0.74, views7d:62, followers:892, img:13},
+  {id:'c3', name:'Priya Shah', genre:'Storytelling', city:'Austin, TX', color:'#FF9F0A', rank:3, engagement:0.68, views7d:38, followers:1503, img:44},
+  {id:'c4', name:'Deshawn Ruiz', genre:'Roast', city:'Atlanta, GA', color:'#34C759', rank:4, engagement:0.61, views7d:51, followers:640, img:14},
+  {id:'c5', name:'Ollie Chen', genre:'Sketch', city:'Seattle, WA', color:'#AF52DE', rank:5, engagement:0.55, views7d:29, followers:410, img:15},
+  {id:'c6', name:'Fatima Idris', genre:'Stand-Up', city:'Brooklyn, NY', color:'#FF453A', rank:6, engagement:0.49, views7d:33, followers:781, img:48}
+];
+
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+function renderModeBadge(){
+  const s = ctGetState();
+  const b = document.getElementById('mode-badge');
+  b.textContent = s.fan.contentMode;
+  b.className = 'badge-mode ' + (s.fan.contentMode === 'Kids' ? 'kids' : 'adult');
+}
+
+function renderTrending(){
+  const row = document.getElementById('trend-row');
+  row.innerHTML = COMEDIANS.slice(0,5).map(c => `
+    <div class="trend-card" onclick="openProfile('${c.id}')">
+      <div style="position:relative;">
+        <span class="trend-rank">#${c.rank}</span>
+        <div class="trend-avatar" style="background:${c.color}; margin-top:8px;">${initials(c.name)}<img class="avatar-photo" src="https://i.pravatar.cc/150?img=${c.img}" alt="" onerror="this.remove()"></div>
+      </div>
+      <div class="trend-name">${c.name}</div>
+      <div class="trend-genre">${c.genre}</div>
+    </div>
+  `).join('');
+}
+
+let activeGenre = 'All';
+const genres = ['All','Stand-Up','Improv','Storytelling','Roast','Sketch'];
+function renderGenreChips(){
+  document.getElementById('genre-chips').innerHTML = genres.map(g =>
+    `<div class="chip ${g===activeGenre?'active':''}" onclick="setGenre('${g}')">${g}</div>`
+  ).join('') + `<div class="chip filter-trigger" onclick="openFilters()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 5h16M7 12h10M10 19h4"/></svg>
+      Filters
+    </div>`;
+}
+function setGenre(g){ activeGenre = g; renderGenreChips(); renderList(); }
+
+function renderList(){
+  const s = ctGetState();
+  const list = COMEDIANS.filter(c => activeGenre==='All' || c.genre===activeGenre).sort((a,b)=>a.rank-b.rank);
+  const wrap = document.getElementById('ranked-list');
+  if(!list.length){ wrap.innerHTML = `<p style="padding:20px; text-align:center;">No comedians match this filter yet.</p>`; return; }
+  wrap.innerHTML = list.map(c => {
+    const followed = s.fan.followed.includes(c.id);
+    const saved = s.fan.saved.includes(c.id);
+    return `
+    <div class="list-card" onclick="openProfile('${c.id}')">
+      <div class="list-avatar" style="background:${c.color}">${initials(c.name)}<img class="avatar-photo" src="https://i.pravatar.cc/150?img=${c.img}" alt="" onerror="this.remove()"></div>
+      <div class="list-body">
+        <div class="list-top"><span class="list-name">${c.name}</span></div>
+        <div class="list-meta">${c.genre} · ${c.city}</div>
+        <div class="list-stats">${Math.round(c.engagement*100)}% engagement · ${c.followers.toLocaleString()} followers</div>
+      </div>
+      <div class="list-actions">
+        <button class="mini-btn ${followed?'on':''}" onclick="event.stopPropagation(); toggleFollow('${c.id}')" aria-label="Follow">
+          <svg viewBox="0 0 24 24" fill="${followed?'currentColor':'none'}" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path d="M12 20s-7-4.5-9.3-8.8C1 8 2.5 5 5.7 5c1.8 0 3.2 1 4.3 2.6C11.1 6 12.5 5 14.3 5 17.5 5 19 8 19.3 11.2 17 15.5 12 20 12 20z"/></svg>
+        </button>
+        <button class="mini-btn ${saved?'on':''}" onclick="event.stopPropagation(); toggleSave('${c.id}')" aria-label="Save">
+          <svg viewBox="0 0 24 24" fill="${saved?'currentColor':'none'}" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFollow(id){
+  const s = ctGetState();
+  const arr = s.fan.followed.includes(id) ? s.fan.followed.filter(x=>x!==id) : [...s.fan.followed, id];
+  ctSetFan({ followed: arr });
+  ctToast(arr.includes(id) ? 'Following '+nameOf(id) : 'Unfollowed '+nameOf(id), 'success');
+  renderList();
+}
+function toggleSave(id){
+  const s = ctGetState();
+  const arr = s.fan.saved.includes(id) ? s.fan.saved.filter(x=>x!==id) : [...s.fan.saved, id];
+  ctSetFan({ saved: arr });
+  ctToast(arr.includes(id) ? 'Saved '+nameOf(id) : 'Removed from Saved', 'success');
+  renderList();
+}
+function nameOf(id){ return (COMEDIANS.find(c=>c.id===id)||{}).name || ''; }
+
+function openProfile(id){
+  ctSetFan({ lastViewedComedian: id });
+  window.location.href = 'comedian-profile.html?id=' + id;
+}
+
+function openFilters(){
+  const panel = document.getElementById('fp-genres');
+  panel.innerHTML = genres.filter(g=>g!=='All').map(g => `<div class="chip" data-g="${g}" onclick="this.classList.toggle('active')">${g}</div>`).join('');
+  document.getElementById('filter-overlay').classList.add('show');
+}
+function closeFilters(){ document.getElementById('filter-overlay').classList.remove('show'); }
+function applyFilters(){
+  const chosen = [...document.querySelectorAll('#fp-genres .chip.active')].map(c=>c.dataset.g);
+  activeGenre = chosen.length === 1 ? chosen[0] : 'All';
+  renderGenreChips(); renderList(); closeFilters();
+  ctToast('Filters applied.', 'success');
+}
+function resetFilters(){ activeGenre='All'; document.getElementById('fp-city').value=''; renderGenreChips(); renderList(); closeFilters(); }
+
+renderModeBadge(); renderTrending(); renderGenreChips(); renderList();
+</script>
+</body>
+</html>

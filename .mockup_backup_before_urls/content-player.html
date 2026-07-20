@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Now Playing — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-overlay:40; --z-modal:45; --z-toast:60; --safe-bottom:env(safe-area-inset-bottom,0px); }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; z-index:25; pointer-events:none;}
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:15px; font-weight:700; margin:0; flex:1; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  h2{ font-size:17px; font-weight:800; letter-spacing:-.2px; margin:0 0 4px;} h3{font-size:14px;font-weight:700;margin:0;}
+  p{ margin:0 0 8px; line-height:1.55; color:var(--text-muted); font-size:13.5px; }
+  .player-wrap{ position:relative; background:#000; height:230px; display:flex; align-items:center; justify-content:center; overflow:hidden; background-size:cover; background-position:center; }
+  .player-wrap::before{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.55)); z-index:0; }
+  .player-wrap svg.bg-icon{ width:70px; height:70px; color:rgba(255,255,255,.14); position:absolute; }
+  .progress-bar, .time-row{ z-index:2; }
+  .play-toggle{ width:56px; height:56px; border-radius:50%; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; backdrop-filter:blur(4px); }
+  .progress-bar{ position:absolute; bottom:0; left:0; right:0; height:3px; background:rgba(255,255,255,.15); }
+  .progress-fill{ height:100%; background:var(--red); width:0%; transition:width .9s linear; }
+  .time-row{ position:absolute; bottom:8px; left:10px; right:10px; display:flex; justify-content:space-between; font-size:11px; font-weight:700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.5); }
+  .demo-flag{ position:absolute; top:10px; left:10px; background:rgba(0,0,0,.55); font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px; color:var(--amber); z-index:2; }
+  .rating-flag{ position:absolute; top:10px; right:10px; font-size:9.5px; font-weight:800; padding:3px 7px; border-radius:6px; text-transform:uppercase; z-index:2; }
+  .rating-flag.clean{ background:rgba(52,199,89,.85); color:#03210d; } .rating-flag.adult{ background:rgba(255,69,58,.9); color:#2b0402; }
+  .info{ padding:16px; }
+  .comedian-link{ display:flex; align-items:center; gap:8px; margin-top:6px; cursor:pointer; }
+  .mini-avatar{ width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; position:relative; overflow:hidden; }
+  .avatar-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:1; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:0; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+  .overlay{ position:absolute; inset:0; background:rgba(0,0,0,.7); z-index:var(--z-overlay); display:none; align-items:center; justify-content:center; padding:24px; text-align:center; }
+  .overlay.show{ display:flex; }
+  .paywall-card{ background:var(--surface); border:1px solid var(--border-strong); border-radius:20px; padding:24px 20px; max-width:300px; box-shadow:var(--shadow); position:relative; }
+  .paywall-card .close{ position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%; background:var(--surface-2); border:none; color:var(--text-muted); cursor:pointer; }
+  .lock-ic{ width:52px; height:52px; border-radius:50%; background:rgba(204,0,0,.15); color:var(--red); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+  .blocked-card{ text-align:center; padding:40px 24px; }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="history.length>1?history.back():location.href='discover.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 id="top-title">Now Playing</h1>
+      <button class="iconbtn" style="opacity:0; pointer-events:none;">·</button>
+    </div>
+
+    <div id="player-area"></div>
+    <div id="info-area"></div>
+  </div>
+
+  <div class="overlay" id="paywall">
+    <div class="paywall-card">
+      <button class="close" onclick="dismissPaywall()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="lock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+      <h3 style="font-size:17px; margin-bottom:6px;">Preview ended</h3>
+      <p>Subscribe to Premium to keep watching this set and everything else on ComicTube.</p>
+      <button class="btn" style="width:100%; height:46px; border-radius:12px; background:var(--red); color:#fff; border:none; font-weight:700; margin-top:6px;" onclick="location.href='tier-select.html'">Subscribe to Premium — $6.99/mo</button>
+    </div>
+  </div>
+
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctSetState(patch){ const cur = ctGetState(); const next = Object.assign({}, cur, patch); localStorage.setItem(CT_KEY, JSON.stringify(next)); return next; }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>', error:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 2800); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+const COMEDIANS = [
+  {id:'c1', name:'Nina Volkov', color:'#CC0000', img:47}, {id:'c2', name:'Marcus Boone', color:'#0A84FF', img:13},
+  {id:'c3', name:'Priya Shah', color:'#FF9F0A', img:44}, {id:'c4', name:'Deshawn Ruiz', color:'#34C759', img:14},
+  {id:'c5', name:'Ollie Chen', color:'#AF52DE', img:15}, {id:'c6', name:'Fatima Idris', color:'#FF453A', img:48}
+];
+const CONTENT = [
+  {id:'v1', comedianId:'c1', title:'Live at The Basement — Full Set', type:'Video', rating:'Adult', duration:'8:42', fullSeconds:20, plays:3120, desc:"Recorded live at The Basement, Los Angeles. Nina's full uncut set — deadpan family stories and airport rage."},
+  {id:'v2', comedianId:'c1', title:'On Airports (Clean Clip)', type:'Video', rating:'Clean', duration:'3:04', fullSeconds:20, plays:980, desc:'A clean-rated highlight clip, safe for Kids Mode viewers.'},
+  {id:'v3', comedianId:'c2', title:'Open Mic Chaos Vol. 3', type:'Video', rating:'Adult', duration:'10:40', fullSeconds:20, plays:2210, desc:'Improv built entirely from audience heckles at a Chicago open mic.'},
+  {id:'v4', comedianId:'c3', title:'Worst Roommate Ever (Audio)', type:'Audio', rating:'Clean', duration:'6:50', fullSeconds:20, plays:1540, desc:'A true story about the worst roommate Priya has ever had.'},
+  {id:'v5', comedianId:'c4', title:'Roast Battle Highlights', type:'Video', rating:'Adult', duration:'5:55', fullSeconds:20, plays:1875, desc:'Highlights from a roast battle with real venom and a soft landing.'},
+  {id:'v6', comedianId:'c5', title:'Sketch: The DMV Line', type:'Video', rating:'Clean', duration:'4:58', fullSeconds:20, plays:760, desc:'A three-person sketch troupe condensed into one very tired man at the DMV.'},
+  {id:'v7', comedianId:'c1', title:'Backstage Ramble (Audio)', type:'Audio', rating:'Adult', duration:'12:10', fullSeconds:20, plays:640, desc:'Unfiltered backstage audio, recorded right after a set.'},
+  {id:'v8', comedianId:'c6', title:'Loud Room, Louder Set', type:'Video', rating:'Adult', duration:'9:12', fullSeconds:20, plays:1290, desc:'A loud room meets a louder set. Not for Kids Mode.'}
+];
+
+const params = new URLSearchParams(location.search);
+const contentId = params.get('id') || 'v1';
+const item = CONTENT.find(c=>c.id===contentId) || CONTENT[0];
+const comedian = COMEDIANS.find(c=>c.id===item.comedianId);
+const PREVIEW_SECONDS = 10; // 2-minute spec preview, simulated as 10s for this demo
+
+const state = ctGetState();
+const isOwner = state.role === 'comedian' && state.comedian.id === item.comedianId;
+const isKidsBlocked = item.rating === 'Adult' && state.fan.contentMode === 'Kids' && state.role !== 'comedian';
+
+document.getElementById('top-title').textContent = item.title;
+
+function renderBlocked(){
+  document.getElementById('player-area').innerHTML = '';
+  document.getElementById('info-area').innerHTML = `
+    <div class="blocked-card">
+      <div class="lock-ic" style="margin-bottom:16px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="26" height="26"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+      <h2>Not available in Kids Mode</h2>
+      <p>This content is rated Adult and is hidden entirely while Kids Mode is active. Switch to Adult Mode in Account Settings to view it.</p>
+      <button class="btn" style="height:46px; border-radius:12px; background:var(--red); color:#fff; border:none; font-weight:700; width:100%; margin-top:8px;" onclick="location.href='account.html'">Go to Account Settings</button>
+    </div>
+  `;
+}
+
+function renderPlayer(){
+  document.getElementById('player-area').innerHTML = `
+    <div class="player-wrap" id="player-wrap" style="background-image:url('https://picsum.photos/seed/${item.id}/500/300');">
+      <span class="demo-flag">Demo: preview = ${PREVIEW_SECONDS}s</span>
+      <span class="rating-flag ${item.rating.toLowerCase()}">${item.rating}</span>
+      <svg class="bg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${item.type==='Audio' ? '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>' : '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/>'}</svg>
+      <button class="play-toggle" id="play-btn" onclick="togglePlay()">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M7 4l13 8-13 8z"/></svg>
+      </button>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="time-row"><span id="time-elapsed">0:00</span><span id="time-total">${item.duration}</span></div>
+    </div>
+  `;
+  document.getElementById('info-area').innerHTML = `
+    <div class="info">
+      <h2>${item.title}</h2>
+      <div class="comedian-link" onclick="location.href='comedian-profile.html?id=${comedian.id}'">
+        <div class="mini-avatar" style="background:${comedian.color}">${comedian.name.split(' ').map(w=>w[0]).join('')}<img class="avatar-photo" src="https://i.pravatar.cc/100?img=${comedian.img}" alt="" onerror="this.remove()"></div>
+        <span style="font-size:13px; font-weight:700;">${comedian.name}</span>
+      </div>
+      <p style="margin-top:12px;">${item.desc}</p>
+      <p class="faint" style="font-size:12px;">${item.plays.toLocaleString()} plays · ${item.type}</p>
+    </div>
+  `;
+}
+
+let elapsed = 0, playing = false, timer = null;
+const limitSeconds = (state.fan.membershipTier === 'Premium' || isOwner) ? item.fullSeconds : PREVIEW_SECONDS;
+
+function fmt(s){ const m = Math.floor(s/60); const r = Math.floor(s%60).toString().padStart(2,'0'); return m+':'+r; }
+
+function togglePlay(){
+  playing = !playing;
+  const btn = document.getElementById('play-btn');
+  btn.innerHTML = playing
+    ? '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M7 4l13 8-13 8z"/></svg>';
+  if(playing){ timer = setInterval(tick, 1000); } else { clearInterval(timer); }
+}
+
+function tick(){
+  elapsed++;
+  document.getElementById('progress-fill').style.width = Math.min(100, (elapsed/item.fullSeconds)*100) + '%';
+  document.getElementById('time-elapsed').textContent = fmt(elapsed);
+  if(elapsed >= limitSeconds){
+    clearInterval(timer); playing = false;
+    if(limitSeconds < item.fullSeconds){
+      document.getElementById('paywall').classList.add('show');
+    } else {
+      ctToast("You've reached the end of this set.", 'success');
+      document.getElementById('play-btn').innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M7 4l13 8-13 8z"/></svg>';
+    }
+  }
+}
+function dismissPaywall(){
+  document.getElementById('paywall').classList.remove('show');
+  // Content does not resume on dismiss per spec — playback stays paused.
+}
+
+if(isKidsBlocked){ renderBlocked(); } else { renderPlayer(); }
+</script>
+</body>
+</html>

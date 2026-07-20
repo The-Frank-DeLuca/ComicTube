@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Checkout — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-toast:60; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; }
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:17px; font-weight:700; margin:0; flex:1; text-align:center; padding-right:40px; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  h2{ font-size:19px; font-weight:800; margin:0 0 4px;} h3{font-size:14px;font-weight:700;margin:0;}
+  p{ margin:0 0 8px; line-height:1.5; color:var(--text-muted); font-size:13.5px; }
+  .pad{ padding:18px; }
+  .summary-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:14px 16px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+  .field input{ width:100%; height:46px; border-radius:12px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); padding:0 14px; font-size:15px; font-family:inherit; }
+  .field input:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-glow); }
+  .field .err-msg{ font-size:12px; color:var(--danger); margin-top:5px; display:none; font-weight:600; }
+  .field.error input{ border-color:var(--danger); } .field.error .err-msg{ display:block; }
+  .row2{ display:flex; gap:10px; }
+  .row2 .field{ flex:1; }
+  .stripe-badge{ display:flex; align-items:center; justify-content:center; gap:6px; font-size:11.5px; color:var(--text-faint); margin-top:14px; }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:48px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; }
+  .btn:active{ transform:scale(.97); } .btn-primary{ background:var(--red); color:#fff; } .btn[disabled]{ opacity:.6; pointer-events:none; }
+  .demo-note{ margin-top:16px; padding:12px 14px; background:var(--surface); border:1px dashed var(--border-strong); border-radius:12px; font-size:11.5px; color:var(--text-faint); line-height:1.6; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:0; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="history.length>1?history.back():location.href='tier-select.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1>Checkout</h1>
+    </div>
+    <div class="pad">
+      <div class="summary-card">
+        <div><h3>ComicTube Premium</h3><p style="margin:0;">Monthly subscription</p></div>
+        <strong style="font-size:17px;">$6.99</strong>
+      </div>
+
+      <form onsubmit="return pay(event)">
+        <div class="field" id="f-card">
+          <label for="card">Card number</label>
+          <input id="card" inputmode="numeric" value="4242 4242 4242 4242" maxlength="19">
+          <div class="err-msg">Your card was declined. Try a different card.</div>
+        </div>
+        <div class="row2">
+          <div class="field" id="f-exp">
+            <label for="exp">Expiry</label>
+            <input id="exp" inputmode="numeric" placeholder="MM/YY" value="12/29">
+            <div class="err-msg">Enter a valid expiry date.</div>
+          </div>
+          <div class="field" id="f-cvc">
+            <label for="cvc">CVC</label>
+            <input id="cvc" inputmode="numeric" placeholder="123" value="123" maxlength="4">
+            <div class="err-msg">Enter a valid CVC.</div>
+          </div>
+        </div>
+        <div class="field" id="f-zip">
+          <label for="zip">Billing ZIP</label>
+          <input id="zip" inputmode="numeric" placeholder="94501" value="94501">
+        </div>
+        <button class="btn btn-primary" type="submit" id="pay-btn">Pay $6.99</button>
+        <div class="stripe-badge">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Secured by Stripe (mock)
+        </div>
+      </form>
+      <div class="demo-note">
+        <strong>Demo tip:</strong> the prefilled card succeeds. Change the card number to <code>4000 0000 0000 0002</code> to preview a declined-card error.
+      </div>
+    </div>
+  </div>
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctSetState(patch){ const cur = ctGetState(); const next = Object.assign({}, cur, patch); localStorage.setItem(CT_KEY, JSON.stringify(next)); return next; }
+function ctSetFan(patch){ const s = ctGetState(); s.fan = Object.assign({}, s.fan, patch); ctSetState(s); }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>', error:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 3200); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+function pay(e){
+  e.preventDefault();
+  document.getElementById('f-card').classList.remove('error');
+  const card = document.getElementById('card').value.replace(/\s/g,'');
+  const btn = document.getElementById('pay-btn');
+
+  if(card === '4000000000000002'){
+    document.getElementById('f-card').classList.add('error');
+    ctToast('Payment failed — card declined.', 'error');
+    return false;
+  }
+
+  btn.disabled = true; btn.textContent = 'Processing…';
+  setTimeout(()=>{
+    const today = new Date();
+    ctSetFan({ membershipTier:'Premium', billingDate: today.toISOString().slice(0,10) });
+    window.location.href = 'premium-confirm.html';
+  }, 900);
+  return false;
+}
+</script>
+</body>
+</html>

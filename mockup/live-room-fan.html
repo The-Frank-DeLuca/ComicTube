@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Live Room — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-toast:60; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:#000; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:#000; overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .stage{ position:absolute; inset:0; background:radial-gradient(circle at 50% 30%, #2a0505, #000 70%); display:flex; align-items:center; justify-content:center; }
+  .stage-avatar{ width:120px; height:120px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:800; color:#fff; box-shadow:0 0 0 6px rgba(255,255,255,.06); position:relative; overflow:hidden; }
+  .mini-avatar{ position:relative; overflow:hidden; }
+  .avatar-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:1; }
+  .topbar{ position:absolute; top:0; left:0; right:0; z-index:20; display:flex; align-items:center; gap:10px; padding:14px; }
+  @media (min-width:760px){ .topbar{ padding-top:52px; } }
+  .iconbtn{ width:38px; height:38px; border-radius:50%; border:none; background:rgba(0,0,0,.45); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .live-pill{ display:flex; align-items:center; gap:6px; background:var(--danger); padding:6px 10px; border-radius:20px; font-size:11px; font-weight:800; text-transform:uppercase; }
+  .dot{ width:7px; height:7px; border-radius:50%; background:#fff; animation:blink 1s infinite; }
+  @keyframes blink{ 50%{opacity:.3;} }
+  .viewer-pill{ margin-left:auto; display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.45); padding:6px 12px; border-radius:20px; font-size:12px; font-weight:700; }
+  .viewer-pill svg{ width:14px; height:14px; }
+  .bottom-panel{ position:absolute; left:0; right:0; bottom:0; z-index:20; padding:16px; background:linear-gradient(to top, rgba(0,0,0,.85), transparent); }
+  .comedian-info{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .mini-avatar{ width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; }
+  .comedian-info h3{ font-size:14px; margin:0; } .comedian-info p{ font-size:11.5px; color:var(--text-muted); margin:0; }
+  .reaction-row{ display:flex; gap:10px; }
+  .reaction-btn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:14px; padding:10px 0; cursor:pointer; color:#fff; }
+  .reaction-btn:active{ transform:scale(.92); }
+  .reaction-btn svg{ width:22px; height:22px; }
+  .reaction-count{ font-size:11px; font-weight:700; color:var(--text-muted); }
+  .floaters{ position:absolute; inset:0; z-index:15; pointer-events:none; overflow:hidden; }
+  .floater{ position:absolute; bottom:120px; font-size:22px; animation:float-up 2.2s ease-out forwards; }
+  @keyframes float-up{ from{ transform:translateY(0) scale(1); opacity:1;} to{ transform:translateY(-260px) scale(1.3); opacity:0;} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="stage"><div class="stage-avatar" id="stage-avatar">NV</div></div>
+  <div class="floaters" id="floaters"></div>
+  <div class="topbar">
+    <button class="iconbtn" onclick="history.length>1?history.back():location.href='https://comictube.app/rooms'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="live-pill"><span class="dot"></span>Live</div>
+    <div class="viewer-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/></svg><span id="viewer-count">184</span></div>
+  </div>
+  <div class="bottom-panel">
+    <div class="comedian-info">
+      <div class="mini-avatar" id="mini-avatar">NV</div>
+      <div><h3 id="room-title">Room</h3><p id="room-sub">Comedian</p></div>
+    </div>
+    <div class="reaction-row">
+      <button class="reaction-btn" onclick="react('laugh')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8.5 10.5h.01M15.5 10.5h.01M7.5 14a5 5 0 0 0 9 0"/></svg>
+        <span class="reaction-count" id="count-laugh">1.2k</span>
+      </button>
+      <button class="reaction-btn" onclick="react('fire')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3s5 4 5 9a5 5 0 0 1-10 0c0-1.5.8-2.5 1.5-3.3.2 1 .9 1.8 1.8 1.8-.3-2 .3-4 2.7-5.5-.3 1.2 0 2 1 2z"/></svg>
+        <span class="reaction-count" id="count-fire">860</span>
+      </button>
+      <button class="reaction-btn" onclick="react('clap')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l1.2 4.6L18 8l-4.8 1.4L12 14l-1.2-4.6L6 8l4.8-1.4z"/><path d="M19 15l.6 2.4L22 18l-2.4.6L19 21l-.6-2.4L16 18l2.4-.6z"/></svg>
+        <span class="reaction-count" id="count-clap">540</span>
+      </button>
+    </div>
+  </div>
+</div>
+<script>
+const COMEDIANS = { c1:{name:'Nina Volkov', color:'#CC0000', img:47}, c2:{name:'Marcus Boone', color:'#0A84FF', img:13}, c4:{name:'Deshawn Ruiz', color:'#34C759', img:14} };
+const ROOMS = { r1:{title:'Friday Night Freestyle', comedianId:'c2', viewers:184}, r2:{title:'Nina Unfiltered', comedianId:'c1', viewers:96}, r3:{title:'Roast Prep Live', comedianId:'c4', viewers:52} };
+const params = new URLSearchParams(location.search);
+const room = ROOMS[params.get('id')] || ROOMS.r1;
+const c = COMEDIANS[room.comedianId];
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+document.getElementById('room-title').textContent = room.title;
+document.getElementById('room-sub').textContent = c.name;
+const photoTag = `<img class="avatar-photo" src="https://i.pravatar.cc/200?img=${c.img}" alt="" onerror="this.remove()">`;
+document.getElementById('stage-avatar').innerHTML = initials(c.name) + photoTag;
+document.getElementById('stage-avatar').style.background = c.color;
+document.getElementById('mini-avatar').innerHTML = initials(c.name) + photoTag;
+document.getElementById('mini-avatar').style.background = c.color;
+
+let viewers = room.viewers;
+document.getElementById('viewer-count').textContent = viewers;
+setInterval(()=>{
+  viewers += Math.round((Math.random()-.35) * 6);
+  if(viewers < 20) viewers = 20;
+  document.getElementById('viewer-count').textContent = viewers;
+}, 2500);
+
+const counts = { laugh: 1200, fire: 860, clap: 540 };
+const emoji = { laugh:'😂', fire:'🔥', clap:'👏' };
+function fmt(n){ return n >= 1000 ? (n/1000).toFixed(1)+'k' : n; }
+function react(type){
+  counts[type]++;
+  document.getElementById('count-'+type).textContent = fmt(counts[type]);
+  spawnFloater(type);
+}
+function spawnFloater(type){
+  const wrap = document.getElementById('floaters');
+  const el = document.createElement('div');
+  el.className = 'floater';
+  el.style.left = (20 + Math.random()*60) + '%';
+  el.textContent = emoji[type];
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(), 2300);
+}
+setInterval(()=>{
+  const types = ['laugh','fire','clap'];
+  const t = types[Math.floor(Math.random()*types.length)];
+  counts[t]++;
+  document.getElementById('count-'+t).textContent = fmt(counts[t]);
+  if(Math.random() > .4) spawnFloater(t);
+}, 1400);
+</script>
+</body>
+</html>

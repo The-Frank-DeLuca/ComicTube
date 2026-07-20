@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Choose Your Mode — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-overlay:40; --z-modal:45; --z-toast:60; --safe-bottom:env(safe-area-inset-bottom,0px); }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; }
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  h2{ font-size:22px; font-weight:800; letter-spacing:-.3px; margin:0 0 4px;} h3{font-size:15px;font-weight:700;margin:0 0 4px;}
+  p{ margin:0 0 8px; line-height:1.55; color:var(--text-muted); font-size:14px; }
+  .pad{ padding:28px 20px; }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:48px; padding:0 20px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:var(--red); color:#fff; }
+  .btn-ghost{ background:transparent; color:var(--text-faint); font-weight:600; font-size:13px; }
+  .mode-card{ background:var(--surface); border:2px solid var(--border); border-radius:18px; padding:20px; text-align:left; cursor:pointer; margin-bottom:14px; transition:border-color .15s ease; }
+  .mode-card.selected{ border-color:var(--red); }
+  .mode-card .row{ display:flex; align-items:center; gap:14px; }
+  .mode-ic{ width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .mode-ic.kids{ background:rgba(52,199,89,.15); color:var(--green); }
+  .mode-ic.adult{ background:rgba(255,69,58,.15); color:var(--danger); }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:0; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); } .toast.warn{ border-left-color:var(--amber); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); } .toast.warn svg{ color:var(--amber); }
+  .toast .msg{ font-size:13.5px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+  .overlay{ position:absolute; inset:0; background:rgba(0,0,0,.62); z-index:var(--z-overlay); display:none; align-items:center; justify-content:center; padding:24px; }
+  .overlay.show{ display:flex; }
+  .dialog{ width:100%; max-width:300px; background:var(--surface); border-radius:20px; padding:24px 20px; text-align:center; box-shadow:var(--shadow); }
+  .dialog .ic{ width:56px; height:56px; border-radius:50%; background:rgba(255,69,58,.15); color:var(--danger); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="pad">
+      <h2>Choose your content mode</h2>
+      <p>You can change this any time in Account Settings. This choice controls whether Adult-rated sets are visible in your feed.</p>
+
+      <div class="mode-card selected" id="card-adult" onclick="select('Adult')">
+        <div class="row">
+          <div class="mode-ic adult">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </div>
+          <div><h3>Adult Mode</h3><p style="margin:0;">Full catalog, including profanity and edgy material. 18+ only.</p></div>
+        </div>
+      </div>
+
+      <div class="mode-card" id="card-kids" onclick="select('Kids')">
+        <div class="row">
+          <div class="mode-ic kids">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><circle cx="12" cy="12" r="9"/><path d="M8.5 10.5h.01M15.5 10.5h.01M7.5 14a5 5 0 0 0 9 0"/></svg>
+          </div>
+          <div><h3>Kids Mode</h3><p style="margin:0;">Clean-rated content only. Adult sets are hidden entirely.</p></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="confirmMode()" style="margin-top:8px;">Continue</button>
+      <button class="btn btn-ghost" onclick="showAgeGate()">Preview: under-18 age gate</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="age-overlay">
+    <div class="dialog">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M12 3 2 20h20z"/><path d="M12 9v5M12 17h.01"/></svg></div>
+      <h3>Adult Mode isn't available</h3>
+      <p>Adult Mode is not available for accounts under 18. This account stays in Kids Mode.</p>
+      <button class="btn btn-primary" onclick="document.getElementById('age-overlay').classList.remove('show')">Got it</button>
+    </div>
+  </div>
+
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctSetState(patch){ const cur = ctGetState(); const next = Object.assign({}, cur, patch); localStorage.setItem(CT_KEY, JSON.stringify(next)); return next; }
+function ctSetFan(patch){ const s = ctGetState(); s.fan = Object.assign({}, s.fan, patch); ctSetState(s); }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 3000); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+let mode = 'Adult';
+function select(m){
+  mode = m;
+  document.getElementById('card-adult').classList.toggle('selected', m==='Adult');
+  document.getElementById('card-kids').classList.toggle('selected', m==='Kids');
+}
+function confirmMode(){
+  ctSetFan({ contentMode: mode });
+  ctToast(mode + ' Mode selected.', 'success');
+  setTimeout(()=>window.location.href='discover.html', 600);
+}
+function showAgeGate(){ document.getElementById('age-overlay').classList.add('show'); }
+</script>
+</body>
+</html>

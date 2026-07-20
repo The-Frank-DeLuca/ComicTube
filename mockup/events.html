@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Events — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-nav:10; --z-sticky:20; --z-overlay:40; --z-modal:45; --z-toast:60; --safe-bottom:env(safe-area-inset-bottom,0px); }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; display:flex; flex-direction:column; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; z-index:5; pointer-events:none;}
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; flex:1; overflow-y:auto; scrollbar-width:none; display:flex; flex-direction:column; min-height:0; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; justify-content:space-between; height:56px; padding:0 16px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:19px; font-weight:800; margin:0; }
+  .iconbtn{ width:38px; height:38px; border-radius:50%; border:none; background:var(--red); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  p{ margin:0; line-height:1.5; color:var(--text-muted); font-size:13px; }
+  .content-scroll{ flex:1; overflow-y:auto; padding:14px 16px; }
+  .filter-bar{ display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; scrollbar-width:none; }
+  .filter-bar::-webkit-scrollbar{ display:none; }
+  .chip{ flex-shrink:0; padding:8px 14px; border-radius:20px; background:var(--surface-2); border:1px solid var(--border-strong); font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; white-space:nowrap; }
+  .chip.active{ background:var(--red); border-color:var(--red); color:#fff; }
+  .event-card{ display:flex; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px; margin-bottom:10px; cursor:pointer; }
+  .event-date{ width:52px; height:52px; border-radius:12px; background:var(--surface-2); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; }
+  .event-date .mo{ font-size:10px; font-weight:800; color:var(--red); text-transform:uppercase; }
+  .event-date .day{ font-size:17px; font-weight:800; }
+  .event-body{ flex:1; min-width:0; }
+  .event-name{ font-weight:700; font-size:14px; }
+  .event-meta{ font-size:11.5px; color:var(--text-faint); margin-top:3px; }
+  .fmt-tag{ display:inline-block; font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px; background:rgba(10,132,255,.15); color:var(--blue); margin-top:6px; text-transform:uppercase; }
+  .tabbar{ position:sticky; bottom:0; z-index:var(--z-nav); display:flex; background:rgba(20,20,21,.92); backdrop-filter:blur(16px); border-top:1px solid var(--border); padding:6px 4px calc(6px + var(--safe-bottom)); }
+  .tabbar a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; color:var(--text-faint); font-size:10px; font-weight:600; border-radius:12px; cursor:pointer; }
+  .tabbar a.active{ color:var(--red); }
+  .tabbar svg{ width:22px; height:22px; }
+  .overlay{ position:absolute; inset:0; background:rgba(0,0,0,.6); z-index:var(--z-overlay); display:none; align-items:flex-end; }
+  .overlay.show{ display:flex; }
+  .sheet{ width:100%; background:var(--surface); border-radius:22px 22px 0 0; padding:10px 20px calc(20px + var(--safe-bottom)); z-index:var(--z-modal); max-height:88%; overflow-y:auto; }
+  .sheet-handle{ width:36px; height:4px; border-radius:3px; background:var(--border-strong); margin:6px auto 14px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+  .field input, .field select, .field textarea{ width:100%; height:46px; border-radius:12px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); padding:0 14px; font-size:15px; font-family:inherit; }
+  .field textarea{ height:auto; padding:10px 14px; resize:vertical; line-height:1.5; }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-glow); }
+  .field .err-msg{ font-size:12px; color:var(--danger); margin-top:5px; display:none; font-weight:600; }
+  .field.error input, .field.error select{ border-color:var(--danger); } .field.error .err-msg{ display:block; }
+  .row2{ display:flex; gap:10px; } .row2 .field{ flex:1; }
+  .btn{ height:48px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; background:var(--red); color:#fff; }
+  .btn:active{ transform:scale(.97); }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:70px; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <h1>Events</h1>
+      <button class="iconbtn" id="add-event-btn" style="display:none;" onclick="openAddEvent()" aria-label="Add Event">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="content-scroll">
+      <div class="filter-bar" id="chips"></div>
+      <div id="list"></div>
+    </div>
+    <div class="tabbar" id="tabbar"></div>
+  </div>
+
+  <div class="overlay" id="add-event-overlay" onclick="if(event.target===this) closeAddEvent()">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h3 style="margin-bottom:12px;">Add Event</h3>
+      <form onsubmit="return submitEvent(event)">
+        <div class="field" id="f-name"><label>Event name</label><input id="ev-name-input" placeholder="e.g. Underground Sundays"><div class="err-msg">Event name is required.</div></div>
+        <div class="row2">
+          <div class="field" id="f-date"><label>Date</label><input id="ev-date-input" type="date"><div class="err-msg">Date is required.</div></div>
+          <div class="field"><label>Time</label><input id="ev-time-input" type="time" value="20:00"></div>
+        </div>
+        <div class="field"><label>Format</label>
+          <select id="ev-format-input">
+            <option>In-Person</option><option>Online</option><option>Open Mic</option>
+          </select>
+        </div>
+        <div class="field" id="f-loc"><label>Location or link</label><input id="ev-loc-input" placeholder="Venue, city or online link"><div class="err-msg">Location is required.</div></div>
+        <div class="field"><label>Description</label><textarea id="ev-desc-input" rows="2" placeholder="Short description for fans"></textarea></div>
+        <button class="btn" type="submit">Publish Event</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+const CUSTOM_EVENTS_KEY = 'ct_custom_events_v1';
+function ctGetState(){ try{ return JSON.parse(localStorage.getItem(CT_KEY)) || {role:null}; }catch(e){ return {role:null}; } }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>', error:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 3000); }
+function getCustomEvents(){ try{ return JSON.parse(localStorage.getItem(CUSTOM_EVENTS_KEY)) || []; }catch(e){ return []; } }
+function saveCustomEvent(ev){ const all = getCustomEvents(); all.push(ev); localStorage.setItem(CUSTOM_EVENTS_KEY, JSON.stringify(all)); }
+
+function renderTabbar(){
+  const role = ctGetState().role;
+  document.getElementById('add-event-btn').style.display = role === 'comedian' ? 'flex' : 'none';
+  const tabbar = document.getElementById('tabbar');
+  if(role === 'comedian'){
+    tabbar.innerHTML = `
+      <a onclick="location.href='https://comictube.app/comedian-dashboard'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg><span>Dashboard</span></a>
+      <a onclick="location.href='https://comictube.app/analytics'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="3.5" height="8"/><rect x="10.25" y="6" width="3.5" height="14"/><rect x="16.5" y="9" width="3.5" height="11"/></svg><span>Analytics</span></a>
+      <a onclick="location.href='https://comictube.app/community'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg><span>Community</span></a>
+      <a class="active" onclick="location.href='https://comictube.app/events'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Events</span></a>
+      <a onclick="location.href='https://comictube.app/comedian-account'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><span>Account</span></a>
+    `;
+  } else {
+    tabbar.innerHTML = `
+      <a onclick="location.href='https://comictube.app/discover'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z"/></svg><span>Discover</span></a>
+      <a class="active" onclick="location.href='https://comictube.app/events'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Events</span></a>
+      <a onclick="location.href='https://comictube.app/rooms'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg><span>Rooms</span></a>
+      <a onclick="location.href='https://comictube.app/saved'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span>Saved</span></a>
+      <a onclick="location.href='https://comictube.app/account'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><span>Account</span></a>
+    `;
+  }
+}
+renderTabbar();
+
+const EVENTS = [
+  {id:'e1', name:'Underground Sundays', date:'2026-07-27', time:'8:00 PM', format:'In-Person', location:'The Basement, Los Angeles, CA'},
+  {id:'e2', name:'Open Mic Night', date:'2026-07-24', time:'7:30 PM', format:'Open Mic', location:'Coyote Room, Austin, TX'},
+  {id:'e3', name:'ComicTube Online Showcase', date:'2026-08-02', time:'9:00 PM', format:'Online', location:'ComicTube Live Room'},
+  {id:'e4', name:'Roast Battle: Vol. 4', date:'2026-08-08', time:'9:30 PM', format:'In-Person', location:'The Cellar, Atlanta, GA'}
+];
+let activeFmt = 'All';
+const formats = ['All','In-Person','Online','Open Mic'];
+function renderChips(){
+  document.getElementById('chips').innerHTML = formats.map(f => `<div class="chip ${f===activeFmt?'active':''}" onclick="setFmt('${f}')">${f}</div>`).join('');
+}
+function setFmt(f){ activeFmt = f; renderChips(); renderList(); }
+function allEvents(){ return [...EVENTS, ...getCustomEvents()]; }
+function renderList(){
+  const list = allEvents().filter(e => activeFmt==='All' || e.format===activeFmt).sort((a,b)=> new Date(a.date)-new Date(b.date));
+  const wrap = document.getElementById('list');
+  if(!list.length){ wrap.innerHTML = '<p style="padding:20px; text-align:center;">No upcoming events match this filter.</p>'; return; }
+  wrap.innerHTML = list.map(e => {
+    const d = new Date(e.date+'T00:00:00');
+    const mo = d.toLocaleDateString('en-US',{month:'short'});
+    return `
+    <div class="event-card" onclick="location.href='https://comictube.app/event-detail?id=${e.id}'">
+      <div class="event-date"><span class="mo">${mo}</span><span class="day">${d.getDate()}</span></div>
+      <div class="event-body">
+        <div class="event-name">${e.name}</div>
+        <div class="event-meta">${e.time} · ${e.location}</div>
+        <span class="fmt-tag">${e.format}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+renderChips(); renderList();
+
+function openAddEvent(){
+  document.getElementById('ev-date-input').value = new Date().toISOString().slice(0,10);
+  document.getElementById('add-event-overlay').classList.add('show');
+}
+function closeAddEvent(){ document.getElementById('add-event-overlay').classList.remove('show'); }
+function clearEventErrors(){ ['f-name','f-date','f-loc'].forEach(id=>document.getElementById(id).classList.remove('error')); }
+
+function submitEvent(e){
+  e.preventDefault();
+  clearEventErrors();
+  const name = document.getElementById('ev-name-input').value.trim();
+  const date = document.getElementById('ev-date-input').value;
+  const time = document.getElementById('ev-time-input').value;
+  const format = document.getElementById('ev-format-input').value;
+  const location = document.getElementById('ev-loc-input').value.trim();
+  const desc = document.getElementById('ev-desc-input').value.trim();
+  let hasError = false;
+  if(!name){ document.getElementById('f-name').classList.add('error'); hasError = true; }
+  if(!date){ document.getElementById('f-date').classList.add('error'); hasError = true; }
+  if(!location){ document.getElementById('f-loc').classList.add('error'); hasError = true; }
+  if(hasError){ ctToast('Please fill in the required fields.', 'error'); return false; }
+
+  const s = ctGetState();
+  const performer = (s.comedian && s.comedian.stageName) || 'You';
+  const timeLabel = (() => {
+    const [h,m] = time.split(':').map(Number);
+    const ap = h>=12 ? 'PM' : 'AM'; const h12 = h%12===0 ? 12 : h%12;
+    return h12+':'+m.toString().padStart(2,'0')+' '+ap;
+  })();
+
+  saveCustomEvent({
+    id: 'ce' + Date.now(),
+    name, date, time: timeLabel, format, location,
+    performers: [performer],
+    desc: desc || ('Posted by ' + performer + '.')
+  });
+
+  closeAddEvent();
+  document.getElementById('ev-name-input').value = '';
+  document.getElementById('ev-loc-input').value = '';
+  document.getElementById('ev-desc-input').value = '';
+  ctToast('Event published! It’s now live in Events.', 'success');
+  renderList();
+}
+</script>
+</body>
+</html>

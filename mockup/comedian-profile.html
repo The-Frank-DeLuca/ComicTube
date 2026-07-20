@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Comedian Profile — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-overlay:40; --z-modal:45; --z-toast:60; --safe-bottom:env(safe-area-inset-bottom,0px); }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; z-index:25; pointer-events:none;}
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:16px; font-weight:700; margin:0; flex:1; text-align:center; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  h2{ font-size:20px; font-weight:800; letter-spacing:-.3px; margin:0 0 2px;} h3{font-size:14px;font-weight:700;margin:0 0 2px;}
+  p{ margin:0 0 8px; line-height:1.55; color:var(--text-muted); font-size:13.5px; }
+  .cover{ height:100px; background:linear-gradient(135deg, var(--accent, #CC0000), #1A1A1A); background-size:cover; background-position:center; position:relative; }
+  .cover::after{ content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.55)); }
+  .avatar-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:1; }
+  .thumb-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
+  .profile-head{ padding:0 16px 16px; margin-top:-40px; }
+  .p-avatar{ width:84px; height:84px; border-radius:22px; border:4px solid var(--bg); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:28px; color:#fff; margin-bottom:10px; position:relative; overflow:hidden; }
+  .p-meta{ font-size:12.5px; color:var(--text-faint); margin-bottom:10px; }
+  .p-actions{ display:flex; gap:8px; margin-bottom:14px; }
+  .p-actions .btn{ flex:1; height:42px; border-radius:12px; font-size:13px; }
+  .stat-row{ display:flex; gap:18px; margin-bottom:14px; }
+  .stat-row div{ text-align:left; }
+  .stat-val{ font-weight:800; font-size:15px; }
+  .stat-lbl{ font-size:11px; color:var(--text-faint); }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; font-weight:700; cursor:pointer; }
+  .btn:active{ transform:scale(.96); }
+  .btn-primary{ background:var(--red); color:#fff; }
+  .btn-outline{ background:var(--surface-2); color:var(--text); border:1px solid var(--border-strong); }
+  .btn-icon{ width:42px; flex:0 0 42px !important; background:var(--surface-2); color:var(--text); border:1px solid var(--border-strong); }
+  .btn-icon.on{ color:var(--red); border-color:var(--red); background:rgba(204,0,0,.12); }
+  .subscribe-banner{ margin:0 16px 16px; background:linear-gradient(135deg, rgba(204,0,0,.18), rgba(204,0,0,.05)); border:1px solid rgba(204,0,0,.4); border-radius:16px; padding:14px; }
+  .content-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 16px 24px; }
+  .content-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; }
+  .content-thumb{ height:84px; display:flex; align-items:center; justify-content:center; position:relative; }
+  .content-thumb svg{ width:26px; height:26px; color:rgba(255,255,255,.85); }
+  .content-dur{ position:absolute; bottom:5px; right:6px; background:rgba(0,0,0,.6); font-size:10px; font-weight:700; padding:2px 5px; border-radius:5px; }
+  .content-rating{ position:absolute; top:5px; left:6px; font-size:9px; font-weight:800; padding:2px 6px; border-radius:5px; text-transform:uppercase; }
+  .content-rating.clean{ background:rgba(52,199,89,.85); color:#03210d; }
+  .content-rating.adult{ background:rgba(255,69,58,.9); color:#2b0402; }
+  .content-title{ font-size:12px; font-weight:700; padding:8px 8px 3px; line-height:1.3; }
+  .content-plays{ font-size:10.5px; color:var(--text-faint); padding:0 8px 8px; }
+  .section-title{ padding:0 16px 8px; font-size:11.5px; font-weight:800; color:var(--text-faint); text-transform:uppercase; letter-spacing:.5px; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:0; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+  .overlay{ position:absolute; inset:0; background:rgba(0,0,0,.6); z-index:var(--z-overlay); display:none; align-items:flex-end; }
+  .overlay.show{ display:flex; }
+  .sheet{ width:100%; background:var(--surface); border-radius:22px 22px 0 0; padding:10px 20px calc(20px + var(--safe-bottom)); z-index:var(--z-modal); }
+  .sheet-handle{ width:36px; height:4px; border-radius:3px; background:var(--border-strong); margin:6px auto 14px; }
+  .share-link-box{ background:var(--surface-2); border:1px solid var(--border-strong); border-radius:10px; padding:10px 12px; font-size:12px; color:var(--text-muted); word-break:break-all; margin-bottom:14px; }
+  .tip-row{ display:flex; gap:8px; margin-bottom:14px; }
+  .tip-chip{ flex:1; height:44px; border-radius:10px; background:var(--surface-2); border:1px solid var(--border-strong); color:var(--text); font-weight:700; cursor:pointer; }
+  .tip-chip.active{ background:var(--red); border-color:var(--red); }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="history.length>1?history.back():location.href='https://comictube.app/discover'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 id="top-name">Comedian</h1>
+      <button class="iconbtn" onclick="openShare()" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.3 10.7l7.4-4.4M8.3 13.3l7.4 4.4"/></svg></button>
+    </div>
+
+    <div class="cover" id="cover"></div>
+    <div class="profile-head">
+      <div class="p-avatar" id="avatar"></div>
+      <h2 id="p-name">—</h2>
+      <div class="p-meta" id="p-meta">—</div>
+      <div class="stat-row">
+        <div><div class="stat-val" id="p-followers">0</div><div class="stat-lbl">Followers</div></div>
+        <div><div class="stat-val" id="p-engagement">0%</div><div class="stat-lbl">Engagement</div></div>
+        <div><div class="stat-val" id="p-rank">#0</div><div class="stat-lbl">Rank</div></div>
+      </div>
+      <p id="p-bio">—</p>
+      <div class="p-actions">
+        <button class="btn btn-icon" id="follow-btn" onclick="toggleFollow()" aria-label="Follow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M12 20s-7-4.5-9.3-8.8C1 8 2.5 5 5.7 5c1.8 0 3.2 1 4.3 2.6C11.1 6 12.5 5 14.3 5 17.5 5 19 8 19.3 11.2 17 15.5 12 20 12 20z"/></svg></button>
+        <button class="btn btn-icon" id="save-btn" onclick="toggleSave()" aria-label="Save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
+        <button class="btn btn-primary" style="flex:2;" onclick="location.href='https://comictube.app/tier-select'">Subscribe</button>
+        <button class="btn btn-outline" style="flex:1.4;" onclick="openTip()">Tip</button>
+      </div>
+    </div>
+
+    <div class="subscribe-banner" id="sub-banner">
+      <h3>Unlock the full catalog</h3>
+      <p>Go Premium ($6.99/mo) to watch full sets from every comedian on ComicTube, including this one.</p>
+      <button class="btn btn-primary" style="width:100%; height:40px; border-radius:10px; font-size:13px;" onclick="location.href='https://comictube.app/tier-select'">See Premium</button>
+    </div>
+
+    <div class="section-title">Content</div>
+    <div class="content-grid" id="content-grid"></div>
+  </div>
+
+  <div class="overlay" id="share-overlay" onclick="if(event.target===this) closeSheet('share-overlay')">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h3 style="margin-bottom:10px;">Share this profile</h3>
+      <div class="share-link-box" id="share-link">https://comictube.app/c1?utm_source=share</div>
+      <button class="btn btn-primary" style="width:100%; height:46px; border-radius:12px;" onclick="copyShare()">Copy Link</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="tip-overlay" onclick="if(event.target===this) closeSheet('tip-overlay')">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h3 style="margin-bottom:10px;">Send a tip</h3>
+      <p>100% of your tip (minus processing) goes directly to this comedian.</p>
+      <div class="tip-row">
+        <button class="tip-chip" onclick="selectTip(this,1)">$1</button>
+        <button class="tip-chip active" onclick="selectTip(this,3)">$3</button>
+        <button class="tip-chip" onclick="selectTip(this,5)">$5</button>
+        <button class="tip-chip" onclick="selectTip(this,10)">$10</button>
+      </div>
+      <button class="btn btn-primary" style="width:100%; height:46px; border-radius:12px;" onclick="sendTip()">Send Tip — $<span id="tip-amt">3</span></button>
+    </div>
+  </div>
+
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctSetState(patch){ const cur = ctGetState(); const next = Object.assign({}, cur, patch); localStorage.setItem(CT_KEY, JSON.stringify(next)); return next; }
+function ctSetFan(patch){ const s = ctGetState(); s.fan = Object.assign({}, s.fan, patch); ctSetState(s); }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>', error:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 2800); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+const COMEDIANS = [
+  {id:'c1', name:'Nina Volkov', genre:'Stand-Up', city:'Los Angeles, CA', color:'#CC0000', rank:1, engagement:0.87, followers:1247, bio:'Dry, deadpan sets about immigrant family chaos and late-capitalism dread.', img:47},
+  {id:'c2', name:'Marcus Boone', genre:'Improv', city:'Chicago, IL', color:'#0A84FF', rank:2, engagement:0.74, followers:892, bio:'Long-form improv built from audience heckles. No two sets alike.', img:13},
+  {id:'c3', name:'Priya Shah', genre:'Storytelling', city:'Austin, TX', color:'#FF9F0A', rank:3, engagement:0.68, followers:1503, bio:'True stories from a decade of bad dates and worse roommates.', img:44},
+  {id:'c4', name:'Deshawn Ruiz', genre:'Roast', city:'Atlanta, GA', color:'#34C759', rank:4, engagement:0.61, followers:640, bio:'Roast sets with real venom and a soft landing at the end.', img:14},
+  {id:'c5', name:'Ollie Chen', genre:'Sketch', city:'Seattle, WA', color:'#AF52DE', rank:5, engagement:0.55, followers:410, bio:'Three-person sketch troupe condensed into one very tired man.', img:15},
+  {id:'c6', name:'Fatima Idris', genre:'Stand-Up', city:'Brooklyn, NY', color:'#FF453A', rank:6, engagement:0.49, followers:781, bio:'Loud, physical, and unafraid of a heckler. Adult Mode recommended.', img:48}
+];
+const CONTENT = [
+  {id:'v1', comedianId:'c1', title:'Live at The Basement — Full Set', type:'Video', rating:'Adult', duration:'8:42', plays:3120},
+  {id:'v2', comedianId:'c1', title:'On Airports (Clean Clip)', type:'Video', rating:'Clean', duration:'3:04', plays:980},
+  {id:'v3', comedianId:'c2', title:'Open Mic Chaos Vol. 3', type:'Video', rating:'Adult', duration:'10:40', plays:2210},
+  {id:'v4', comedianId:'c3', title:'Worst Roommate Ever (Audio)', type:'Audio', rating:'Clean', duration:'6:50', plays:1540},
+  {id:'v5', comedianId:'c4', title:'Roast Battle Highlights', type:'Video', rating:'Adult', duration:'5:55', plays:1875},
+  {id:'v6', comedianId:'c5', title:'Sketch: The DMV Line', type:'Video', rating:'Clean', duration:'4:58', plays:760},
+  {id:'v7', comedianId:'c1', title:'Backstage Ramble (Audio)', type:'Audio', rating:'Adult', duration:'12:10', plays:640},
+  {id:'v8', comedianId:'c6', title:'Loud Room, Louder Set', type:'Video', rating:'Adult', duration:'9:12', plays:1290}
+];
+
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+const params = new URLSearchParams(location.search);
+const id = params.get('id') || 'c1';
+const comedian = COMEDIANS.find(c=>c.id===id) || COMEDIANS[0];
+
+function render(){
+  const s = ctGetState();
+  document.getElementById('top-name').textContent = comedian.name;
+  document.getElementById('p-name').textContent = comedian.name;
+  document.getElementById('p-meta').textContent = comedian.genre + ' · ' + comedian.city;
+  document.getElementById('p-bio').textContent = comedian.bio;
+  document.getElementById('p-followers').textContent = comedian.followers.toLocaleString();
+  document.getElementById('p-engagement').textContent = Math.round(comedian.engagement*100)+'%';
+  document.getElementById('p-rank').textContent = '#'+comedian.rank;
+  document.getElementById('cover').style.setProperty('--accent', comedian.color);
+  document.getElementById('cover').style.background = `linear-gradient(135deg, ${comedian.color}, #1A1A1A), url('https://picsum.photos/seed/cover-${comedian.id}/600/240') center/cover`;
+  const av = document.getElementById('avatar');
+  av.style.background = comedian.color;
+  av.innerHTML = initials(comedian.name) + `<img class="avatar-photo" src="https://i.pravatar.cc/200?img=${comedian.img}" alt="" onerror="this.remove()">`;
+  document.getElementById('share-link').textContent = 'https://comictube.app/'+comedian.id+'?utm_source=share';
+
+  const followed = s.fan.followed.includes(comedian.id);
+  const saved = s.fan.saved.includes(comedian.id);
+  const fb = document.getElementById('follow-btn'); fb.classList.toggle('on', followed);
+  fb.querySelector('svg').setAttribute('fill', followed ? 'currentColor' : 'none');
+  const sb = document.getElementById('save-btn'); sb.classList.toggle('on', saved);
+  sb.querySelector('svg').setAttribute('fill', saved ? 'currentColor' : 'none');
+
+  document.getElementById('sub-banner').style.display = s.fan.membershipTier === 'Premium' ? 'none' : 'block';
+
+  const items = CONTENT.filter(c => c.comedianId === comedian.id && !(s.fan.contentMode === 'Kids' && c.rating === 'Adult'));
+  const grid = document.getElementById('content-grid');
+  if(!items.length){ grid.innerHTML = '<p style="grid-column:1/-1; padding:10px 2px;">No Clean-rated content yet from this comedian in Kids Mode.</p>'; return; }
+  grid.innerHTML = items.map(c => `
+    <div class="content-card" onclick="location.href='https://comictube.app/content-player?id=${c.id}'">
+      <div class="content-thumb" style="background:linear-gradient(135deg, ${comedian.color}55, #101011);">
+        <img class="thumb-photo" src="https://picsum.photos/seed/${c.id}/300/200" alt="" onerror="this.remove()">
+        <span class="content-rating ${c.rating.toLowerCase()}" style="z-index:1;">${c.rating}</span>
+        <span class="content-dur" style="z-index:1;">${c.duration}</span>
+        <svg style="z-index:1; filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4l13 8-13 8z"/></svg>
+      </div>
+      <div class="content-title">${c.title}</div>
+      <div class="content-plays">${c.plays.toLocaleString()} plays</div>
+    </div>
+  `).join('');
+}
+
+function toggleFollow(){
+  const s = ctGetState();
+  const has = s.fan.followed.includes(comedian.id);
+  ctSetFan({ followed: has ? s.fan.followed.filter(x=>x!==comedian.id) : [...s.fan.followed, comedian.id] });
+  ctToast(has ? 'Unfollowed '+comedian.name : 'Following '+comedian.name, 'success');
+  render();
+}
+function toggleSave(){
+  const s = ctGetState();
+  const has = s.fan.saved.includes(comedian.id);
+  ctSetFan({ saved: has ? s.fan.saved.filter(x=>x!==comedian.id) : [...s.fan.saved, comedian.id] });
+  ctToast(has ? 'Removed from Saved' : 'Saved '+comedian.name, 'success');
+  render();
+}
+function openShare(){ document.getElementById('share-overlay').classList.add('show'); }
+function openTip(){ document.getElementById('tip-overlay').classList.add('show'); }
+function closeSheet(id){ document.getElementById(id).classList.remove('show'); }
+function copyShare(){ ctToast('Share link copied to clipboard.', 'success'); closeSheet('share-overlay'); }
+let tipAmount = 3;
+function selectTip(btn, amt){
+  document.querySelectorAll('.tip-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); tipAmount = amt; document.getElementById('tip-amt').textContent = amt;
+}
+function sendTip(){
+  closeSheet('tip-overlay');
+  ctToast('$'+tipAmount+' tip sent to '+comedian.name+'!', 'success');
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Upload Content — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-toast:60; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; }
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:17px; font-weight:700; margin:0; flex:1; text-align:center; padding-right:40px; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  h2{ font-size:18px; font-weight:800; margin:0 0 4px;} h3{font-size:14px;font-weight:700;margin:0;}
+  p{ margin:0 0 8px; line-height:1.55; color:var(--text-muted); font-size:13.5px; }
+  .pad{ padding:20px; }
+  .dropzone{ border:2px dashed var(--border-strong); border-radius:18px; padding:36px 20px; text-align:center; cursor:pointer; }
+  .dropzone svg{ width:36px; height:36px; color:var(--text-faint); margin-bottom:10px; }
+  .status-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; text-align:center; }
+  .status-ic{ width:56px; height:56px; border-radius:50%; background:rgba(204,0,0,.15); color:var(--red); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+  .progress-track{ height:8px; border-radius:4px; background:var(--surface-2); overflow:hidden; margin:14px 0 6px; }
+  .progress-fill{ height:100%; width:0%; background:var(--red); transition:width .25s ease; }
+  .spin{ animation:spin 1s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .field{ margin-bottom:15px; }
+  .field label{ display:block; font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+  .field input, .field textarea{ width:100%; height:46px; border-radius:12px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); padding:0 14px; font-size:15px; font-family:inherit; }
+  .field textarea{ height:auto; padding:10px 14px; resize:vertical; }
+  .field input:focus, .field textarea:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-glow); }
+  .field .hint{ font-size:11.5px; color:var(--text-faint); margin-top:5px; }
+  .rating-row{ display:flex; gap:10px; }
+  .rating-btn{ flex:1; padding:12px; border-radius:12px; border:2px solid var(--border-strong); background:var(--surface-2); cursor:pointer; text-align:center; font-weight:700; font-size:13px; color:var(--text-muted); }
+  .rating-btn.active.clean{ border-color:var(--green); color:var(--green); background:rgba(52,199,89,.1); }
+  .rating-btn.active.adult{ border-color:var(--danger); color:var(--danger); background:rgba(255,69,58,.1); }
+  .btn{ height:48px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; background:var(--red); color:#fff; }
+  .btn:active{ transform:scale(.97); } .btn[disabled]{ opacity:.5; pointer-events:none; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:0; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="history.length>1?history.back():location.href='https://comictube.app/comedian-dashboard'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1>Upload Content</h1>
+    </div>
+    <div class="pad" id="step-select">
+      <h2>Add a new set</h2>
+      <p>Upload a video or audio recording. Files are processed by Mux and go live on your profile.</p>
+      <div class="dropzone" onclick="startUpload()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <h3>Tap to select a file</h3>
+        <p style="margin-top:4px;">MP4, MOV, MP3, or WAV</p>
+      </div>
+    </div>
+
+    <div class="pad" id="step-progress" style="display:none;">
+      <div class="status-card">
+        <div class="status-ic"><svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="26" height="26"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></div>
+        <h3 id="status-title">Uploading…</h3>
+        <p style="margin-top:4px;" id="status-sub">live-at-the-basement.mp4</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <p style="font-size:11.5px;" id="progress-pct">0%</p>
+      </div>
+    </div>
+
+    <div class="pad" id="step-settings" style="display:none;">
+      <h2>Content Settings</h2>
+      <form onsubmit="return publish(event)">
+        <div class="field"><label>Title</label><input id="title" value="Live at The Basement — Full Set"></div>
+        <div class="field"><label>Description</label><textarea id="desc" rows="2">Recorded live at The Basement, Los Angeles.</textarea></div>
+        <div class="field">
+          <label>Content rating</label>
+          <div class="rating-row">
+            <div class="rating-btn" id="rate-clean" onclick="setRating('Clean')">Clean</div>
+            <div class="rating-btn active adult" id="rate-adult" onclick="setRating('Adult')">Adult</div>
+          </div>
+          <div class="hint">Adult-rated content is hidden entirely from users in Kids Mode.</div>
+        </div>
+        <div class="field"><label>Preview length (seconds)</label><input id="preview-len" type="number" value="120"><div class="hint">Free-tier fans see this much before the paywall.</div></div>
+        <button class="btn" type="submit" id="publish-btn">Publish</button>
+      </form>
+    </div>
+  </div>
+  <div id="toast-wrap"></div>
+</div>
+<script>
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 2800); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+function show(id){ ['step-select','step-progress','step-settings'].forEach(s=>document.getElementById(s).style.display = s===id ? 'block' : 'none'); }
+
+function startUpload(){
+  show('step-progress');
+  document.getElementById('status-title').textContent = 'Uploading…';
+  let pct = 0;
+  const fill = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-pct');
+  const timer = setInterval(()=>{
+    pct += 8 + Math.random()*10;
+    if(pct >= 100){
+      pct = 100; clearInterval(timer);
+      fill.style.width='100%'; label.textContent='100%';
+      document.getElementById('status-title').textContent = 'Processing with Mux…';
+      document.getElementById('status-sub').textContent = 'Transcoding to adaptive bitrate';
+      setTimeout(()=>show('step-settings'), 1300);
+      return;
+    }
+    fill.style.width = pct+'%'; label.textContent = Math.round(pct)+'%';
+  }, 220);
+}
+
+let rating = 'Adult';
+function setRating(r){
+  rating = r;
+  document.getElementById('rate-clean').className = 'rating-btn' + (r==='Clean' ? ' active clean' : '');
+  document.getElementById('rate-adult').className = 'rating-btn' + (r==='Adult' ? ' active adult' : '');
+}
+
+function publish(e){
+  e.preventDefault();
+  const title = document.getElementById('title').value.trim();
+  if(!title){ ctToast('Title is required.', 'error'); return false; }
+  const btn = document.getElementById('publish-btn');
+  btn.disabled = true; btn.textContent = 'Publishing…';
+  setTimeout(()=>{
+    ctToast('"'+title+'" is now live on your profile.', 'success');
+    setTimeout(()=>location.href='https://comictube.app/comedian-dashboard', 700);
+  }, 600);
+  return false;
+}
+</script>
+</body>
+</html>

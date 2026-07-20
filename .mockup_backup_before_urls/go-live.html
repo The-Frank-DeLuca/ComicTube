@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Go Live — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-toast:60; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; }
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:17px; font-weight:700; margin:0; flex:1; text-align:center; padding-right:40px; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  h2{ font-size:18px; font-weight:800; margin:0 0 4px;}
+  p{ margin:0 0 8px; line-height:1.55; color:var(--text-muted); font-size:13.5px; }
+  .pad{ padding:20px; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+  .field input, .field select{ width:100%; height:46px; border-radius:12px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); padding:0 14px; font-size:15px; font-family:inherit; }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-glow); }
+  .format-row{ display:flex; gap:10px; }
+  .format-btn{ flex:1; padding:14px; border-radius:12px; border:2px solid var(--border-strong); background:var(--surface-2); cursor:pointer; text-align:center; }
+  .format-btn.active{ border-color:var(--red); background:rgba(204,0,0,.1); }
+  .format-btn svg{ width:20px; height:20px; margin-bottom:6px; }
+  .format-btn span{ display:block; font-size:12.5px; font-weight:700; }
+  .toggle-row{ display:flex; background:var(--surface-2); border-radius:12px; padding:4px; margin-bottom:16px; }
+  .toggle-row button{ flex:1; border:none; background:transparent; color:var(--text-muted); font-weight:700; font-size:13px; padding:10px 0; border-radius:9px; cursor:pointer; }
+  .toggle-row button.active{ background:var(--red); color:#fff; }
+  .btn{ height:48px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; background:var(--red); color:#fff; }
+  .btn:active{ transform:scale(.97); }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="history.length>1?history.back():location.href='comedian-dashboard.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1>Go Live</h1>
+    </div>
+    <div class="pad">
+      <h2>Set up your Comedy Room</h2>
+      <p>Your followers get a push notification the moment you go live.</p>
+
+      <form onsubmit="return startRoom(event)">
+        <div class="field"><label>Room title</label><input id="title" value="Nina Unfiltered"></div>
+        <div class="field">
+          <label>Format</label>
+          <div class="format-row">
+            <div class="format-btn active" id="fmt-solo" onclick="setFmt('Solo Set')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><span>Solo Set</span>
+            </div>
+            <div class="format-btn" id="fmt-open" onclick="setFmt('Open Mic')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/><path d="M16 8.2a2.8 2.8 0 1 0 0-5.6"/><path d="M21 19c0-2.4-1.9-4.2-4-4.8"/></svg><span>Open Mic</span>
+            </div>
+          </div>
+        </div>
+        <div class="field"><label>Genre</label>
+          <select id="genre">
+            <option>Stand-Up</option><option>Improv</option><option>Storytelling</option><option>Roast</option><option>Sketch</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>When</label>
+          <div class="toggle-row">
+            <button type="button" class="active" id="when-now" onclick="setWhen('now')">Start Now</button>
+            <button type="button" id="when-later" onclick="setWhen('later')">Schedule</button>
+          </div>
+        </div>
+        <div class="field" id="schedule-field" style="display:none;"><label>Start time</label><input id="start-time" type="datetime-local"></div>
+        <button class="btn" type="submit" id="go-btn">Start Room Now</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+let fmt = 'Solo Set', when = 'now';
+function setFmt(f){ fmt = f; document.getElementById('fmt-solo').classList.toggle('active', f==='Solo Set'); document.getElementById('fmt-open').classList.toggle('active', f==='Open Mic'); }
+function setWhen(w){
+  when = w;
+  document.getElementById('when-now').classList.toggle('active', w==='now');
+  document.getElementById('when-later').classList.toggle('active', w==='later');
+  document.getElementById('schedule-field').style.display = w==='later' ? 'block' : 'none';
+  document.getElementById('go-btn').textContent = w==='later' ? 'Schedule Room' : 'Start Room Now';
+}
+function startRoom(e){
+  e.preventDefault();
+  if(when === 'later'){
+    location.href = 'comedian-dashboard.html';
+    return false;
+  }
+  const btn = document.getElementById('go-btn');
+  btn.disabled = true; btn.textContent = 'Starting…';
+  setTimeout(()=>{ location.href = 'live-room-comedian.html'; }, 700);
+  return false;
+}
+</script>
+</body>
+</html>

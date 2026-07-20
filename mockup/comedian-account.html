@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Account — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-nav:10; --z-sticky:20; --z-overlay:40; --z-toast:60; --safe-bottom:env(safe-area-inset-bottom,0px); }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; display:flex; flex-direction:column; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; z-index:5; pointer-events:none;}
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; flex:1; overflow-y:auto; scrollbar-width:none; display:flex; flex-direction:column; min-height:0; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; height:56px; padding:0 16px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:19px; font-weight:800; margin:0; }
+  h2{ font-size:18px; font-weight:800; margin:0 0 4px; } h3{ font-size:14px; font-weight:700; margin:0; }
+  p{ margin:0; line-height:1.5; color:var(--text-muted); font-size:13px; }
+  .content-scroll{ flex:1; overflow-y:auto; padding:16px; }
+  .profile-row{ display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  .p-avatar{ width:56px; height:56px; border-radius:16px; background:var(--red); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:20px; color:#fff; position:relative; overflow:hidden; }
+  .avatar-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:1; }
+  .sec-label{ font-size:11.5px; font-weight:800; color:var(--text-faint); text-transform:uppercase; letter-spacing:.5px; margin:18px 0 8px; }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+  .row-item{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; cursor:pointer; }
+  .row-item + .row-item{ border-top:1px solid var(--border); }
+  .row-item .left{ display:flex; align-items:center; gap:12px; }
+  .row-item svg{ width:19px; height:19px; color:var(--text-muted); }
+  .badge-pill{ font-size:11px; font-weight:800; padding:4px 10px; border-radius:20px; }
+  .badge-on{ background:rgba(52,199,89,.15); color:var(--green); } .badge-off{ background:rgba(255,159,10,.15); color:var(--amber); }
+  .danger-text{ color:var(--danger); }
+  .banner{ background:linear-gradient(135deg, rgba(204,0,0,.18), rgba(204,0,0,.05)); border:1px solid rgba(204,0,0,.4); border-radius:16px; padding:14px; margin-bottom:4px; }
+  .btn{ height:42px; border-radius:12px; border:none; font-size:13.5px; font-weight:700; cursor:pointer; width:100%; background:var(--red); color:#fff; margin-top:10px; }
+  .btn:active{ transform:scale(.97); } .btn[disabled]{ opacity:.5; pointer-events:none; }
+  .tabbar{ position:sticky; bottom:0; z-index:var(--z-nav); display:flex; background:rgba(20,20,21,.92); backdrop-filter:blur(16px); border-top:1px solid var(--border); padding:6px 4px calc(6px + var(--safe-bottom)); }
+  .tabbar a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; color:var(--text-faint); font-size:10px; font-weight:600; border-radius:12px; cursor:pointer; }
+  .tabbar a.active{ color:var(--red); }
+  .tabbar svg{ width:22px; height:22px; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:70px; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar"><h1>Account</h1></div>
+    <div class="content-scroll">
+      <div class="profile-row">
+        <div class="p-avatar" id="avatar">NV</div>
+        <div><h2 id="c-name" style="font-size:17px;">Nina Volkov</h2><p id="c-meta">—</p></div>
+      </div>
+
+      <div class="banner" id="unlock-banner">
+        <h3>Unlock Monetization — $16 one-time</h3>
+        <p>Activates subscription earnings, direct tips, and your earnings analytics panel.</p>
+        <button class="btn" id="unlock-btn" onclick="unlock()">Unlock for $16.00</button>
+      </div>
+
+      <div class="sec-label">Payouts</div>
+      <div class="card">
+        <div class="row-item">
+          <div class="left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><h3>Stripe Express</h3></div>
+          <span class="badge-pill" id="stripe-badge">Not Connected</span>
+        </div>
+        <div class="row-item" id="connect-row" onclick="connectStripe()">
+          <div class="left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg><h3>Connect Stripe Express</h3></div>
+        </div>
+        <div class="row-item">
+          <div class="left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 6.5c0-2-2.2-3.5-5-3.5S7 4.5 7 6.5 9.2 10 12 10s5 1.5 5 3.5-2.2 3.5-5 3.5-5-1.5-5-3.5"/></svg><h3>Earnings Active</h3></div>
+          <span class="badge-pill" id="earnings-badge">No</span>
+        </div>
+      </div>
+
+      <div class="sec-label">Session</div>
+      <div class="card">
+        <div class="row-item" onclick="logout()">
+          <div class="left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><h3>Log Out</h3></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <a onclick="location.href='https://comictube.app/comedian-dashboard'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg><span>Dashboard</span></a>
+      <a onclick="location.href='https://comictube.app/analytics'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="3.5" height="8"/><rect x="10.25" y="6" width="3.5" height="14"/><rect x="16.5" y="9" width="3.5" height="11"/></svg><span>Analytics</span></a>
+      <a onclick="location.href='https://comictube.app/community'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/></svg><span>Community</span></a>
+      <a onclick="location.href='https://comictube.app/events'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Events</span></a>
+      <a class="active" onclick="location.href='https://comictube.app/comedian-account'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><span>Account</span></a>
+    </div>
+  </div>
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctSetState(patch){ const cur = ctGetState(); const next = Object.assign({}, cur, patch); localStorage.setItem(CT_KEY, JSON.stringify(next)); return next; }
+function ctSetComedian(patch){ const s = ctGetState(); s.comedian = Object.assign({}, s.comedian, patch); ctSetState(s); }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 2800); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+function render(){
+  const s = ctGetState();
+  document.getElementById('avatar').innerHTML = initials(s.comedian.stageName) + '<img class="avatar-photo" src="https://i.pravatar.cc/150?img=47" alt="" onerror="this.remove()">';
+  document.getElementById('c-name').textContent = s.comedian.stageName;
+  document.getElementById('c-meta').textContent = s.comedian.genre + ' · ' + s.comedian.city;
+  document.getElementById('unlock-banner').style.display = s.comedian.monetizationUnlocked ? 'none' : 'block';
+  const stripeBadge = document.getElementById('stripe-badge');
+  stripeBadge.textContent = s.comedian.stripeConnected ? 'Connected' : 'Not Connected';
+  stripeBadge.className = 'badge-pill ' + (s.comedian.stripeConnected ? 'badge-on' : 'badge-off');
+  document.getElementById('connect-row').style.display = s.comedian.stripeConnected ? 'none' : 'flex';
+  const earningsBadge = document.getElementById('earnings-badge');
+  earningsBadge.textContent = s.comedian.earningsActive ? 'Yes' : 'No';
+  earningsBadge.className = 'badge-pill ' + (s.comedian.earningsActive ? 'badge-on' : 'badge-off');
+}
+
+function unlock(){
+  const btn = document.getElementById('unlock-btn');
+  btn.disabled = true; btn.textContent = 'Processing…';
+  setTimeout(()=>{
+    ctSetComedian({ monetizationUnlocked: true });
+    ctToast('Monetization unlocked! Earnings analytics are now active.', 'success');
+    render();
+  }, 700);
+}
+function connectStripe(){
+  ctToast('Redirecting to Stripe Express onboarding (mock)…', 'success');
+  setTimeout(()=>{
+    const s = ctGetState();
+    ctSetComedian({ stripeConnected: true, earningsActive: s.comedian.monetizationUnlocked });
+    ctToast('Stripe Express connected. Payouts are ready.', 'success');
+    render();
+  }, 900);
+}
+function logout(){
+  ctSetState({ role:null });
+  ctToast('Logged out.', 'success');
+  setTimeout(()=>location.href='https://comictube.app/homepage', 500);
+}
+render();
+</script>
+</body>
+</html>

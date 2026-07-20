@@ -1,13 +1,13 @@
-# ComedyVault Master Spec Document
+# ComicTube Master Spec Document
 ## Version 1.0 | Stage 2: Spec and Scope Lock | Gate 1 Sign-Off Required
 
 **Document Authority:** DDBA / DeLuca Designs LLC  
-**Platform Owner:** Adetona "Abe" Adewale | beatsbydummadrumma@gmail.com | (510) 575-8954  
+**Platform Owner:** Adetona "Abe" Adewale | aa@funshomediallc.com | (510) 575-8954 | 2601 Blanding Ave Ste C#105, Alameda, CA 94501  
 **Project Manager:** Frank DeLuca | DeLuca Designs LLC  
 **Target Launch:** July 4, 2026  
 **Build Status:** Pre-build. Gate 1 sign-off required before Sprint 1.
 
-> **HARD STOP:** This document is the single source of truth for the ComedyVault build. Every decision made during Sprints 1 through 7 traces back to a statement written here. If a question arises during the build that this document does not answer, stop. Contact DDBA. Do not make assumptions and build.
+> **HARD STOP:** This document is the single source of truth for the ComicTube build. Every decision made during Sprints 1 through 7 traces back to a statement written here. If a question arises during the build that this document does not answer, stop. Contact DDBA. Do not make assumptions and build.
 
 ---
 
@@ -17,13 +17,14 @@ The following blockers are active. Any work item that depends on these must be f
 
 | # | Blocker | Impact | Owner |
 |---|---------|--------|-------|
-| 1 | ComedyVault LLC not yet formed (California) | Blocks Stripe live mode, Apple Developer, Google Play Console, all live revenue collection | Abe |
-| 2 | Platform trademark search not completed | "ComedyVault" not confirmed clear | Abe |
+| 1 | FunSho Media LLC not yet formed (California) | Blocks Stripe live mode, Apple Developer, Google Play Console, all live revenue collection | Abe |
+| 2 | Platform trademark search not completed | "ComicTube" not confirmed clear | Abe |
 | 3 | Base44 pricing not confirmed | Architecture session required before budget planning at scale | DDBA |
 | 4 | GHL Capability Audit Pass 2 not yet complete | Build team confirmation required before spec is locked | DDBA + Build Team |
 | 5 | Apple Developer and Google Play Console accounts not created | Blocked by LLC | Abe |
 | 6 | App Store IAP pricing decision not made | Mobile billing economics unresolved | DDBA |
 | 7 | Privacy Policy, Terms of Service, Revenue Share Agreement, Refund Policy not yet live | Required before public launch | Abe + Legal |
+| 8 | Abe has requested two additional pre-launch capabilities, relayed informally (Abe → Heather → Frank, 2026-07-20): a "Public Utility" feature and a "Viral Loops" mechanic, both undefined beyond that framing. Stated goal in his words: make the app "sell itself." | Neither capability has a feature definition, user problem statement, screens, or acceptance criteria. Cannot be scoped into MVP or Phase 2 until DDBA defines them per Section 24 Change Control Protocol. Potentially blocks Gate 1 sign-off if Abe intends these for MVP rather than Phase 2. | Abe / DDBA |
 
 ---
 
@@ -61,22 +62,22 @@ The following blockers are active. Any work item that depends on these must be f
 
 ### 1.1 Platform Definition
 
-ComedyVault is a dual-sided marketplace and community platform. Two distinct user types exist: Comedians (supply side) and Fans (demand side). The platform's core function is discovery — surfacing unknown comedians to fans based on content quality and engagement rate, not existing social capital.
+ComicTube is a dual-sided marketplace and community platform. Two distinct user types exist: Comedians (supply side) and Fans (demand side). The platform's core function is discovery — surfacing unknown comedians to fans based on content quality and engagement rate, not existing social capital.
 
-**Differentiation Statement:** ComedyVault is the only platform built exclusively for underground comedy discovery where unknown comedians earn from their first subscriber and fans find talent before the algorithm does.
+**Differentiation Statement:** ComicTube is the only platform built exclusively for underground comedy discovery where unknown comedians earn from their first subscriber and fans find talent before the algorithm does.
 
 ### 1.2 Platform Identity Table
 
 | Field | Value |
 |-------|-------|
-| Working Title | ComedyVault (name to be confirmed after trademark search) |
+| Working Title | ComicTube (name to be confirmed after trademark search) |
 | Platform Type | Dual-sided consumer marketplace and community |
 | Primary Build Platform | GoHighLevel (GHL) — Agency Unlimited or SaaS Pro plan required |
 | Supporting Platforms | Mux (video/audio), Daily.co (live rooms), Stripe Connect Express (payouts), Base44 (discovery algorithm), Claude Code (analytics dashboard) |
 | Mobile Delivery | GHL white-label iOS and Android app. PWA available as launch-day fallback. |
 | Web Delivery | GHL-hosted web app at platform domain |
 | Target Launch Date | July 4, 2026 |
-| Client Owner | Abe Adewale — ComedyVault LLC (California, in formation) |
+| Client Owner | Abe Adewale — FunSho Media LLC, 2601 Blanding Ave Ste C#105, Alameda, CA 94501 (California, in formation) |
 | DDBA Role | Architecture, build oversight, QA sign-off, growth strategy |
 | GHL Build Team Role | Execute build against this spec. Weekly sprint delivery. Contact DDBA for any spec deviation. |
 | Claude Code Role | Finalization layer for features exceeding GHL native capability: analytics dashboard, custom payout logic |
@@ -107,15 +108,15 @@ Underground comedians have no dedicated platform to build their brand, earn from
 | System | Role | Plan / Tier | Monthly Cost | Account Owner | Status |
 |--------|------|-------------|--------------|---------------|--------|
 | GoHighLevel (GHL) | Primary build platform — frontend UI, accounts, membership, automation, payments, email, white-label app | Agency Unlimited or SaaS Pro | $297 or $497/mo | Abe Adewale | PENDING — plan tier to confirm |
-| Mux | Video and audio hosting, transcoding, CDN delivery, play analytics | Pay-as-you-go | ~$150-$400/mo at scale | DDBA / ComedyVault | PENDING — account creation |
-| Daily.co | Live room infrastructure — real-time video/audio, room management, recordings | Pay-as-you-go | ~$450/mo at 50 rooms | DDBA / ComedyVault | PENDING — account creation |
+| Mux | Video and audio hosting, transcoding, CDN delivery, play analytics | Pay-as-you-go | ~$150-$400/mo at scale | DDBA / ComicTube | PENDING — account creation |
+| Daily.co | Live room infrastructure — real-time video/audio, room management, recordings | Pay-as-you-go | ~$450/mo at 50 rooms | DDBA / ComicTube | PENDING — account creation |
 | Stripe (Platform) | Fan subscription collection, comedian unlock, direct tips | Standard | 2.9% + $0.30/transaction | Abe Adewale | PENDING — requires LLC |
 | Stripe Connect Express | Automated 80/20 revenue split payouts to comedian accounts | Express | Per-payout Stripe fees | Abe Adewale | PENDING — requires Stripe platform |
 | Base44 | Discovery algorithm database, engagement rate calculations, ranked list API | TBD | TBD | DDBA | PENDING — architecture session required |
 | Claude Code | Custom analytics dashboard, any feature exceeding GHL native capability | N/A | Included in DDBA engagement | DDBA | ACTIVE — used in Sprint 5 |
-| GHL White-Label App | iOS and Android delivery under ComedyVault brand | Included in GHL Agency plan | Included | Abe Adewale | PENDING — requires Apple Developer + Google Play |
-| Apple Developer Program | Required to publish ComedyVault to iOS App Store | Organization account | $99/year | ComedyVault LLC | PENDING — requires LLC |
-| Google Play Console | Required to publish ComedyVault to Android | Standard | $25 one-time | ComedyVault LLC | PENDING |
+| GHL White-Label App | iOS and Android delivery under ComicTube brand | Included in GHL Agency plan | Included | Abe Adewale | PENDING — requires Apple Developer + Google Play |
+| Apple Developer Program | Required to publish ComicTube to iOS App Store | Organization account | $99/year | FunSho Media LLC | PENDING — requires LLC |
+| Google Play Console | Required to publish ComicTube to Android | Standard | $25 one-time | FunSho Media LLC | PENDING |
 
 ### 2.2 Stack Monthly Cost Estimate
 
@@ -136,16 +137,16 @@ Underground comedians have no dedicated platform to build their brand, earn from
 
 ### 3.1 GHL Account Structure
 
-ComedyVault operates as a single GHL sub-account under the DDBA agency account. All platform data, contacts, automation workflows, membership products, and web pages live in this sub-account.
+ComicTube operates as a single GHL sub-account under the DDBA agency account. All platform data, contacts, automation workflows, membership products, and web pages live in this sub-account.
 
 **GHL Sub-Account Configuration Checklist:**
 
 | Item | Value / Instruction |
 |------|---------------------|
-| Sub-Account Name | ComedyVault |
+| Sub-Account Name | ComicTube |
 | Agency Account Owner | Frank DeLuca / DDBA |
-| Sub-Account Owner | Abe Adewale (ComedyVault email) |
-| Custom Domain | comedyvault.com or confirmed domain — connect after domain purchase |
+| Sub-Account Owner | Abe Adewale (ComicTube email) |
+| Custom Domain | comictube.app or confirmed domain — connect after domain purchase |
 | Timezone | Pacific Time (Abe's timezone) |
 | Business Type | Entertainment / Media |
 | Stripe Connected | Required before any subscription products are created |
@@ -159,15 +160,15 @@ Two membership products must be created in GHL before any subscription workflow 
 
 | Product | Configuration | GHL Setup Steps |
 |---------|---------------|-----------------|
-| Fan Free Tier | No charge. Auto-enrolled on fan registration. Grants: discovery browse, comedian profiles, 2-minute previews, follow/save/share, events, Kids or Adult mode. | 1. Create Membership Product: ComedyVault Free. 2. Set price $0. 3. Configure content access: preview only. 4. Auto-enroll new fan contacts via WF-001. |
-| Fan Premium Tier | $6.99/month recurring. Activated via Stripe checkout. Grants full content access plus exclusive drops. | 1. Create Membership Product: ComedyVault Premium. 2. Set price $6.99/month recurring. 3. Connect to Stripe product. 4. Configure content access: full. 5. Tier upgrade triggered by WF-003 on Stripe payment confirmation. |
+| Fan Free Tier | No charge. Auto-enrolled on fan registration. Grants: discovery browse, comedian profiles, 2-minute previews, follow/save/share, events, Kids or Adult mode. | 1. Create Membership Product: ComicTube Free. 2. Set price $0. 3. Configure content access: preview only. 4. Auto-enroll new fan contacts via WF-001. |
+| Fan Premium Tier | $6.99/month recurring. Activated via Stripe checkout. Grants full content access plus exclusive drops. | 1. Create Membership Product: ComicTube Premium. 2. Set price $6.99/month recurring. 3. Connect to Stripe product. 4. Configure content access: full. 5. Tier upgrade triggered by WF-003 on Stripe payment confirmation. |
 | Comedian Account | No subscription charge. One-time $16 monetization unlock. Grants: profile, content upload, analytics, live rooms, community, events. | 1. Create Contact Type tag: Comedian. 2. Create monetization unlock product: $16 one-time. 3. Comedian access controlled by AccountType field, not membership product. 4. WF-002 assigns Comedian tag on registration. |
 
 ---
 
 ## 4. User Account Architecture
 
-ComedyVault has three account types with distinct access rights, data structures, and navigation experiences. Account type is set at registration and cannot be changed by the user. Admin accounts are created by ComedyVault only.
+ComicTube has three account types with distinct access rights, data structures, and navigation experiences. Account type is set at registration and cannot be changed by the user. Admin accounts are created by ComicTube only.
 
 ### 4.1 Account Types
 
@@ -176,7 +177,7 @@ ComedyVault has three account types with distinct access rights, data structures
 | Fan | Free Tier | Self-registration | Browse discovery, follow/save comedians, 2-min content preview, attend events, Kids or Adult mode |
 | Fan | Premium Tier | Upgrade from Free via Stripe | All Free capabilities plus: full content access, exclusive drops, early access, event discounts |
 | Comedian | Standard | Self-registration with comedian flag | Profile creation, content upload (Mux), analytics dashboard, go live (Daily.co), community access, event listings |
-| Admin | Platform Admin | ComedyVault internal only | All platform access, Platform News posting, comedian verification, content moderation override, platform settings |
+| Admin | Platform Admin | ComicTube internal only | All platform access, Platform News posting, comedian verification, content moderation override, platform settings |
 
 ### 4.2 Fan Registration Flow
 
@@ -248,7 +249,7 @@ Every access rule in the build is derived from this table. If a question arises 
 
 ### 6.1 Data Entity Overview
 
-ComedyVault stores data across:
+ComicTube stores data across:
 - **GHL:** User accounts, contact records, membership tiers, payments, automations (system of record)
 - **Mux:** Video and audio files, play events, engagement data
 - **Daily.co:** Live room sessions, recordings
@@ -354,14 +355,14 @@ Every GHL automation workflow required for the MVP is defined here. Each workflo
 
 | Rule | Value |
 |------|-------|
-| Split | 80% to comedian. 20% retained by ComedyVault platform. |
+| Split | 80% to comedian. 20% retained by ComicTube platform. |
 | Payout Frequency | Monthly. Paid on the 1st of each month for the prior month's subscription revenue. |
 | Minimum Payout Threshold | $10.00. If comedian's earned amount is below $10 in a month, the balance rolls over to the next month. |
 | Payout Method | Stripe Connect Express direct deposit to comedian's connected bank account. |
 | Payout Calculation | Total Premium subscription revenue attributed to comedian in the month, multiplied by 0.80, minus Stripe processing fees (2.9% + $0.30 per transaction, deducted by Stripe before payout). |
 | Platform 20% Use | Platform operations, hosting costs (GHL, Mux, Daily.co), DDBA ongoing support, future feature development. |
-| Tax Responsibility | Comedian is responsible for their own tax obligations. ComedyVault provides a 1099 via Stripe for earnings exceeding $600 in a calendar year. |
-| Dispute Resolution | Comedian disputes a payout by contacting ComedyVault admin via email within 14 days of payout date. Admin reviews Stripe records. Decision is final. |
+| Tax Responsibility | Comedian is responsible for their own tax obligations. ComicTube provides a 1099 via Stripe for earnings exceeding $600 in a calendar year. |
+| Dispute Resolution | Comedian disputes a payout by contacting ComicTube admin via email within 14 days of payout date. Admin reviews Stripe records. Decision is final. |
 
 > **CRITICAL:** Automated 80/20 revenue split payouts are NOT a native GHL feature. GHL collects subscription payments into the platform Stripe account. The payout distribution to comedian Express accounts requires a custom integration between GHL (via webhook) and Stripe Connect Express API. This integration must be built and tested before any comedian is promised automated payouts.
 
@@ -502,7 +503,7 @@ POST {BASE44_INGEST_URL}/events
 
 ### 11.1 MVP Feature Summary
 
-ComedyVault MVP contains 10 features across 37 screens. Every feature is tied to a specific user problem. If the user problem disappears, the feature disappears with it. Features are not added after scope lock without DDBA written approval.
+ComicTube MVP contains 10 features across 37 screens. Every feature is tied to a specific user problem. If the user problem disappears, the feature disappears with it. Features are not added after scope lock without DDBA written approval.
 
 | Feature Group | MVP Count | Phase 2 | Phase 3 |
 |---------------|-----------|---------|---------|
@@ -528,7 +529,7 @@ Sprint 1 | Platform: GHL | User: COMEDIAN
 1. Comedian signs up or logs in. System routes to profile setup flow (first login only).
 2. Comedian uploads profile photo from device.
 3. Comedian completes bio (280 char limit), selects genre tags (max 3 from predefined list), enters location (city/state).
-4. Comedian saves profile. Profile page is now publicly visible at comedyvault.com/[username].
+4. Comedian saves profile. Profile page is now publicly visible at comictube.app/[username].
 5. Fan visits comedian profile. Sees photo, bio, genre, location, content grid, follower count, Subscribe button, and Tip button.
 6. Fan can tap Follow. Follow count increments on profile.
 
@@ -670,7 +671,7 @@ Sprint 2 | Platform: GHL | User: FAN
 2. Fan taps Follow. Follow button changes to Following. Comedian appears in fan's feed.
 3. Fan taps Save. Comedian is added to fan's Saved list. Checkmark appears on Save button.
 4. Fan taps Share. Share modal appears with a generated link that includes a UTM source parameter. Fan copies the link or shares to system share sheet.
-5. Recipient of shared link opens ComedyVault to the comedian's profile. UTM parameter is logged as a share-sourced visit.
+5. Recipient of shared link opens ComicTube to the comedian's profile. UTM parameter is logged as a share-sourced visit.
 6. Fan navigates to their Saved tab in account. All saved comedians displayed. Fan can remove from saved list.
 
 **Acceptance Criteria:**
@@ -714,7 +715,7 @@ Sprint 3 | Platform: GHL + Daily.co | User: BOTH
 **Feature 8 of 10 — Comedian Community and Collaboration Space**
 Sprint 3 | Platform: GHL | User: COMEDIAN
 
-**User Problem:** Comedians working independently have no community infrastructure to connect with other comedians, share material for feedback, find collaboration partners, or ask operational questions. Every other platform puts comedians in competition. ComedyVault puts them in community.
+**User Problem:** Comedians working independently have no community infrastructure to connect with other comedians, share material for feedback, find collaboration partners, or ask operational questions. Every other platform puts comedians in competition. ComicTube puts them in community.
 
 **Delivers:** A dedicated community space visible only to verified comedian accounts. Contains: a general discussion board, a collaboration board (comedians post partnership requests), a material workshop section (comedians share sets for peer feedback), and a platform news board (admin posts only).
 
@@ -726,7 +727,7 @@ Sprint 3 | Platform: GHL | User: COMEDIAN
 3. Comedian selects a board. Board shows posts in reverse chronological order.
 4. Comedian can create a new post: tap New Post, select board, write post, tap Publish.
 5. Other comedians can reply to posts. Reply thread is nested under the post.
-6. Platform News board is write-restricted to ComedyVault admin accounts. All comedian accounts can read but not post.
+6. Platform News board is write-restricted to ComicTube admin accounts. All comedian accounts can read but not post.
 7. Fan accounts cannot access or view the Comedian Community space.
 
 **Acceptance Criteria:**
@@ -879,7 +880,7 @@ Content-Type: application/json
     "playback_policy": ["signed"],
     "max_resolution_tier": "1080p"
   },
-  "cors_origin": "https://comedyvault.com"
+  "cors_origin": "https://comictube.app"
 }
 // Response: { "data": { "id": "upload_id", "url": "upload_url" } }
 // Step 3: GHL frontend PUT the file to the upload_url (direct from browser)
@@ -920,7 +921,7 @@ POST https://api.daily.co/v1/rooms
 Authorization: Bearer {DAILY_API_KEY}
 Content-Type: application/json
 {
-  "name": "comedyvault-{comedian_id}-{timestamp}",
+  "name": "comictube-{comedian_id}-{timestamp}",
   "properties": {
     "exp": {unix_timestamp_4hrs_from_now},
     "max_participants": 1000,
@@ -929,7 +930,7 @@ Content-Type: application/json
     "enable_chat": false
   }
 }
-// Response: { "url": "https://comedyvault.daily.co/{room_name}" }
+// Response: { "url": "https://comictube.daily.co/{room_name}" }
 // Save url to GHL Room record DailyCoRoomURL field via WF-010
 ```
 
@@ -951,7 +952,7 @@ Content-Type: application/json
 // recording.ready event payload:
 {
   "action": "recording-ready",
-  "roomName": "comedyvault-{comedian_id}-{timestamp}",
+  "roomName": "comictube-{comedian_id}-{timestamp}",
   "recordingId": "{recording_id}",
   "duration": {duration_seconds},
   "s3Key": "{s3_path_to_recording}"
@@ -966,17 +967,17 @@ Content-Type: application/json
 
 ### 13.3 Stripe Integration
 
-ComedyVault uses two distinct Stripe components: the Platform Account (where all fan payments are collected) and Stripe Connect Express (which routes 80% of subscription revenue to individual comedian connected accounts).
+ComicTube uses two distinct Stripe components: the Platform Account (where all fan payments are collected) and Stripe Connect Express (which routes 80% of subscription revenue to individual comedian connected accounts).
 
 **Stripe Platform Account Setup:**
 
 | Item | Value |
 |------|-------|
 | Account Type | Standard Stripe account. Connected to GHL via GHL Stripe Integration OAuth. |
-| Account Owner | Abe Adewale / ComedyVault LLC. Business bank account required. |
+| Account Owner | Abe Adewale / FunSho Media LLC, 2601 Blanding Ave Ste C#105, Alameda, CA 94501. Business bank account required. |
 | Connect to GHL | Settings > Payments > Stripe > Connect via OAuth in GHL sub-account. |
 | Webhook Endpoint | Configure in Stripe Dashboard. Events to listen for: payment_intent.succeeded, invoice.payment_failed, customer.subscription.deleted, customer.subscription.updated. |
-| GHL Stripe Products | Two products: (1) ComedyVault Premium — $6.99/month recurring. (2) Comedian Monetization Unlock — $16.00 one-time. |
+| GHL Stripe Products | Two products: (1) ComicTube Premium — $6.99/month recurring. (2) Comedian Monetization Unlock — $16.00 one-time. |
 | Stripe Connect Settings | Enable Connect in Stripe Dashboard (Connect > Settings). Set platform profile to Marketplace. Required before any comedian can create an Express account. |
 
 **Comedian Stripe Express Onboarding Flow:**
@@ -1000,8 +1001,8 @@ Authorization: Bearer {STRIPE_SECRET_KEY}
 POST https://api.stripe.com/v1/account_links
 {
   "account": "acct_XXXXXXXXXX",
-  "refresh_url": "https://comedyvault.com/payout-setup",
-  "return_url": "https://comedyvault.com/payout-setup/complete",
+  "refresh_url": "https://comictube.app/payout-setup",
+  "return_url": "https://comictube.app/payout-setup/complete",
   "type": "account_onboarding"
 }
 // Redirect comedian to the returned URL to complete Stripe KYC
@@ -1064,7 +1065,7 @@ Build a GHL page template for the content player. The template reads the logged-
 
 ## 15. Two-Tier Content Moderation Architecture
 
-ComedyVault's content moderation system uses two gates to enforce age-appropriate content access. Gate 1 is age verification at registration. Gate 2 is the explicit content mode toggle. Both gates must be bypassed for a user to access Adult content. This two-gate system is the App Store compliance architecture.
+ComicTube's content moderation system uses two gates to enforce age-appropriate content access. Gate 1 is age verification at registration. Gate 2 is the explicit content mode toggle. Both gates must be bypassed for a user to access Adult content. This two-gate system is the App Store compliance architecture.
 
 ### 15.1 Gate 1 — Age Verification
 
@@ -1097,7 +1098,7 @@ ComedyVault's content moderation system uses two gates to enforce age-appropriat
 | Clean Rating | Content with no profanity, no adult themes, no explicit sexual references. Appropriate for all ages. |
 | Adult Rating | Content with profanity, adult humor, explicit language, mature themes. Edgy comedy, dark humor, and strong language qualify for Adult. |
 | Misrating Consequence | Misrating Adult content as Clean is a Terms of Service violation. Admin can override any content rating and flag the comedian account. |
-| App Store Compliance Note | Apple App Store requires: (1) Age rating declared for the app as 17+. (2) Adult content is behind a logged-in age-verified account gate. (3) Adult content is behind an explicit opt-in toggle. ComedyVault's two-gate system satisfies all three requirements. |
+| App Store Compliance Note | Apple App Store requires: (1) Age rating declared for the app as 17+. (2) Adult content is behind a logged-in age-verified account gate. (3) Adult content is behind an explicit opt-in toggle. ComicTube's two-gate system satisfies all three requirements. |
 | Admin Override | Admin accounts can change any content's ContentRating field from the GHL backend. This is the moderation mechanism for misrated content. |
 
 ---
@@ -1168,8 +1169,8 @@ Authorization: Bearer {session_token}
 | Setting | Value |
 |---------|-------|
 | Navigation Path in GHL | Agency Account > Mobile App > White-Label > Self-Service Customizer |
-| App Name | ComedyVault (or confirmed final brand name) |
-| App Icon | 1024x1024px PNG. No transparency. No rounded corners (Apple rounds them). ComedyVault brand icon. |
+| App Name | ComicTube (or confirmed final brand name) |
+| App Icon | 1024x1024px PNG. No transparency. No rounded corners (Apple rounds them). ComicTube brand icon. |
 | Splash Screen | Full-bleed brand image. Dimensions: 2732x2732px (covers all iOS device sizes). |
 | Brand Colors | Primary: #CC0000 (red). Secondary: #1A1A1A (black). Both configured in GHL white-label customizer. |
 | App Description (App Store) | A maximum-impact 170-character description for App Store search visibility. To be written in DDBA Phase 3 marketing copy session. |
@@ -1182,18 +1183,18 @@ Authorization: Bearer {session_token}
 
 | Status | Checklist Item | Platform |
 |--------|---------------|---------|
-| Pending | Apple Developer Program account created under ComedyVault LLC | iOS |
-| Pending | App registered in App Store Connect with Bundle ID: com.comedyvault.app | iOS |
+| Pending | Apple Developer Program account created under FunSho Media LLC | iOS |
+| Pending | App registered in App Store Connect with Bundle ID: com.comictube.app | iOS |
 | Pending | In-App Purchase products registered: Premium $6.99/month | iOS |
 | Pending | App icon uploaded: 1024x1024px PNG | iOS |
 | Pending | App screenshots prepared: 6.5-inch (iPhone 14 Pro Max) minimum. 5 screenshots. | iOS |
 | Pending | App Store description written and optimized for keywords | iOS |
-| Pending | Privacy policy URL live on ComedyVault.com | iOS |
-| Pending | Terms of Service URL live on ComedyVault.com | iOS |
+| Pending | Privacy policy URL live on ComicTube.app | iOS |
+| Pending | Terms of Service URL live on ComicTube.app | iOS |
 | Pending | Age rating set to 17+ | iOS |
 | Pending | GHL white-label app build submitted to App Store | iOS |
-| Pending | Google Play Console account created under ComedyVault entity | Android |
-| Pending | App registered in Google Play Console with package name: com.comedyvault.app | Android |
+| Pending | Google Play Console account created under ComicTube entity | Android |
+| Pending | App registered in Google Play Console with package name: com.comictube.app | Android |
 | Pending | In-App Purchase products registered: Premium $6.99/month | Android |
 | Pending | Target API level set to Android 14 (API 34) or current requirement | Android |
 | Pending | Content rating questionnaire completed — High Maturity | Android |
@@ -1205,7 +1206,7 @@ Authorization: Bearer {session_token}
 
 ## 18. Notification System
 
-Every notification in ComedyVault is defined here. Notification triggers are governed by GHL automation workflows.
+Every notification in ComicTube is defined here. Notification triggers are governed by GHL automation workflows.
 
 | WF | Notification Name | Trigger | Recipient | Delivery Method |
 |----|-------------------|---------|-----------|-----------------|
@@ -1250,14 +1251,14 @@ Security requirements are non-negotiable build requirements. They are not post-l
 |------|-------------|----------------|---------|
 | Authentication | Password hashing | GHL handles password hashing natively. No plaintext passwords stored. | CRITICAL |
 | Authentication | Session token management | GHL manages user session tokens. Tokens expire after 24 hours of inactivity — confirm with GHL build team. | HIGH |
-| Authentication | HTTPS enforcement | All ComedyVault web traffic must use HTTPS. GHL provides SSL certificate for custom domains. | CRITICAL |
-| Payment Data | PCI compliance | ComedyVault never stores payment card data. All payment data is handled exclusively by Stripe. | CRITICAL |
+| Authentication | HTTPS enforcement | All ComicTube web traffic must use HTTPS. GHL provides SSL certificate for custom domains. | CRITICAL |
+| Payment Data | PCI compliance | ComicTube never stores payment card data. All payment data is handled exclusively by Stripe. | CRITICAL |
 | Payment Data | Stripe webhooks signature verification | All incoming Stripe webhook events must be verified using Stripe-Signature header and webhook signing secret. Reject any webhook that fails signature verification. | CRITICAL |
 | Content Access | Mux signed tokens | All Mux playback URLs use signed tokens with 24-hour expiry. Direct Mux asset URLs are never exposed to the browser. | HIGH |
 | Content Access | Age-gated content server-side check | Adult content visibility is enforced server-side via GHL contact field check on page render. Client-side JavaScript alone is not a sufficient gate. | CRITICAL |
 | API Security | API key storage | Mux, Daily.co, Stripe, and Base44 API keys are stored as GHL secret environment variables or Claude Code environment variables. Never hardcoded in page templates or client-side code. | CRITICAL |
 | API Security | Rate limiting on webhook endpoints | GHL webhook receivers should be configured to reject requests that do not include expected authentication headers from Mux, Daily.co, and Stripe. | HIGH |
-| Privacy | Data minimization | ComedyVault collects only the data required for platform function: email, display name, date of birth, location (city/state), payment data (Stripe only), content uploads. | HIGH |
+| Privacy | Data minimization | ComicTube collects only the data required for platform function: email, display name, date of birth, location (city/state), payment data (Stripe only), content uploads. | HIGH |
 | Privacy | GDPR and CCPA readiness | Privacy policy must include: data collected, how it is used, user rights (deletion, export), and contact for privacy requests. California-based platform requires CCPA compliance. | HIGH |
 | Privacy | Date of birth handling | DateOfBirth field is used for age verification only. It is stored in GHL but never displayed publicly. It must not appear in any exported data report accessible to non-admin users. | CRITICAL |
 | Content Security | Terms of Service for user-generated content | Comedian uploads are user-generated content. Terms of Service must include a section on content ownership, platform license, prohibited content, and comedian responsibility for content ratings. | HIGH |
@@ -1336,15 +1337,15 @@ Every feature that is NOT in the MVP is logged here. Deferred means it is planne
 
 | Situation | Channel | Who Sends | DDBA SLA | Required Format |
 |-----------|---------|-----------|----------|-----------------|
-| Sprint completion notification | Email or agreed project management tool | GHL Team Lead | 2 business days for DDBA review response | Subject: ComedyVault Sprint [N] Complete. Body: (1) screens built, (2) deviations, (3) link to GHL sub-account. |
-| Capability gap discovered | Email | GHL Team Lead | Same business day acknowledgment | Subject: ComedyVault Capability Gap — [Feature Name]. Body: (1) feature, (2) specific GHL limitation, (3) workaround options if any. |
-| Scope clarification question | Email | GHL Team Lead | 2 business days response | Subject: ComedyVault Spec Question — [Section/Feature]. Do not proceed until DDBA responds. |
-| DDBA sprint advance authorization | Email | DDBA (Frank DeLuca) | After sprint review completion | Subject: ComedyVault Sprint [N] — APPROVED or BLOCKED. |
+| Sprint completion notification | Email or agreed project management tool | GHL Team Lead | 2 business days for DDBA review response | Subject: ComicTube Sprint [N] Complete. Body: (1) screens built, (2) deviations, (3) link to GHL sub-account. |
+| Capability gap discovered | Email | GHL Team Lead | Same business day acknowledgment | Subject: ComicTube Capability Gap — [Feature Name]. Body: (1) feature, (2) specific GHL limitation, (3) workaround options if any. |
+| Scope clarification question | Email | GHL Team Lead | 2 business days response | Subject: ComicTube Spec Question — [Section/Feature]. Do not proceed until DDBA responds. |
+| DDBA sprint advance authorization | Email | DDBA (Frank DeLuca) | After sprint review completion | Subject: ComicTube Sprint [N] — APPROVED or BLOCKED. |
 | Emergency build-stopping issue | Phone + follow-up email | GHL Team Lead to Frank DeLuca | Immediate phone. Email follow-up within 1 hour. | Phone call to Frank DeLuca directly. Followed by email with issue description. |
 
 ### 22.5 Build Quality Standards
 
-The GHL build team is responsible for delivering to DDBA's standard, not GHL's default standard. ComedyVault is a consumer product. These standards apply to every screen and every workflow built.
+The GHL build team is responsible for delivering to DDBA's standard, not GHL's default standard. ComicTube is a consumer product. These standards apply to every screen and every workflow built.
 
 Page load performance target: 3 seconds or under on a standard 4G mobile connection.
 Content gate accuracy: 100%. No free user ever accesses post-preview content without Premium membership.
@@ -1405,7 +1406,7 @@ After Gate 1 sign-off, any change to this document requires written authorizatio
 
 | Date | Version | Requester | Change Description | DDBA Authorization |
 |------|---------|-----------|-------------------|--------------------|
-| | | | | |
+| 2026-07-20 | v1.0 | Abe Adewale (relayed informally: Abe → Heather → Frank DeLuca) | Request for two additional capabilities before launch, named only as "Public Utility" and "Viral Loops." No feature definition, user problem, screens, or acceptance criteria provided. Abe's framing of the goal: make the app "sell itself." | PENDING — classify as Minor or Major per this section's rules, then define scope with Abe before adding to MVP or Phase 2 log |
 | | | | | |
 | | | | | |
 
@@ -1415,7 +1416,7 @@ After Gate 1 sign-off, any change to this document requires written authorizatio
 
 Sprint 1 does not start until both sign-off lines below are completed and this document is filed. A build that starts before this section is signed is an unauthorized build.
 
-By signing below, both parties confirm this document is accurate, complete, and approved as the single source of truth for the ComedyVault build. I confirm I have read this entire document. I understand that the features, flows, logic, and scope defined here are locked. Changes require written authorization from DDBA.
+By signing below, both parties confirm this document is accurate, complete, and approved as the single source of truth for the ComicTube build. I confirm I have read this entire document. I understand that the features, flows, logic, and scope defined here are locked. Changes require written authorization from DDBA.
 
 **Client (Abe Adewale):**
 
@@ -1435,8 +1436,8 @@ Signature: _______________________________ Date: _______________
 
 ---
 
-*DDBA | DeLuca Designs | Master App Spec | ComedyVault | v1.0 | June 2026 | Gate 1 Sign-Off Required*
+*DDBA | DeLuca Designs | Master App Spec | ComicTube | v1.0 | June 2026 | Gate 1 Sign-Off Required*
 
-*Single Source of Truth for the ComedyVault Build | Changes require written DDBA authorization*
+*Single Source of Truth for the ComicTube Build | Changes require written DDBA authorization*
 
 *Confidential | DeLuca Designs LLC | DDBA Ecosystem*

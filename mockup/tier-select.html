@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Choose Your Plan — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-toast:60; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; }
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:17px; font-weight:700; margin:0; flex:1; text-align:center; padding-right:40px; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  h2{ font-size:21px; font-weight:800; letter-spacing:-.3px; margin:0 0 4px;} h3{font-size:16px;font-weight:800;margin:0;}
+  p{ margin:0 0 8px; line-height:1.55; color:var(--text-muted); font-size:14px; }
+  .pad{ padding:18px; }
+  .plan-card{ background:var(--surface); border:2px solid var(--border); border-radius:18px; padding:20px; margin-bottom:14px; }
+  .plan-card.highlight{ border-color:var(--red); background:linear-gradient(160deg, rgba(204,0,0,.12), var(--surface) 60%); }
+  .plan-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .price{ font-size:26px; font-weight:800; } .price span{ font-size:13px; font-weight:600; color:var(--text-muted); }
+  .feat-list{ list-style:none; margin:14px 0; padding:0; }
+  .feat-list li{ display:flex; gap:8px; align-items:flex-start; font-size:13px; color:var(--text-muted); margin-bottom:8px; }
+  .feat-list svg{ width:16px; height:16px; color:var(--green); flex-shrink:0; margin-top:1px; }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:48px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:var(--red); color:#fff; }
+  .btn-secondary{ background:var(--surface-2); color:var(--text); border:1px solid var(--border-strong); }
+  .btn[disabled]{ opacity:.55; pointer-events:none; }
+  .tag-best{ background:var(--red); color:#fff; font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:20px; text-transform:uppercase; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:0; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="history.length>1?history.back():location.href='https://comictube.app/discover'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1>Choose Your Plan</h1>
+    </div>
+    <div class="pad">
+      <h2>Support the comedians you love</h2>
+      <p>Every Premium dollar goes 80% to the comedian you're subscribed through.</p>
+
+      <div class="plan-card" id="free-card">
+        <div class="plan-head"><h3>Free</h3><span class="price">$0<span>/mo</span></span></div>
+        <ul class="feat-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg>Discovery browse and comedian profiles</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg>2-minute preview on every set</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg>Follow, save, and share comedians</li>
+        </ul>
+        <button class="btn btn-secondary" id="free-btn" onclick="stayFree()">Continue Free</button>
+      </div>
+
+      <div class="plan-card highlight" id="premium-card">
+        <div class="plan-head"><h3>Premium <span class="tag-best">Best Value</span></h3><span class="price">$6.99<span>/mo</span></span></div>
+        <ul class="feat-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg>Full-length access to every set, every comedian</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg>Exclusive drops and early access</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg>Event discounts</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4 10-10"/></svg>Cancel any time, no contracts</li>
+        </ul>
+        <button class="btn btn-primary" id="premium-btn" onclick="location.href='https://comictube.app/checkout'">Go Premium — $6.99/mo</button>
+      </div>
+      <p class="faint" style="font-size:11.5px; text-align:center;">Billed monthly. Cancel any time in Account Settings.</p>
+    </div>
+  </div>
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 2600); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+function stayFree(){ ctToast('Sticking with Free for now.', 'success'); setTimeout(()=>location.href='https://comictube.app/discover', 500); }
+
+(function(){
+  const s = ctGetState();
+  if(s.fan.membershipTier === 'Premium'){
+    document.getElementById('premium-btn').textContent = 'You are on Premium';
+    document.getElementById('premium-btn').disabled = true;
+    document.getElementById('free-btn').textContent = 'Downgrade to Free';
+  }
+})();
+</script>
+</body>
+</html>

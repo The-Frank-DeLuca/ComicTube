@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Event Detail — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-toast:60; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; z-index:25; pointer-events:none;}
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:16px; font-weight:700; margin:0; flex:1; text-align:center; padding-right:40px; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  .hero{ height:120px; background:linear-gradient(135deg, rgba(204,0,0,.5), #101011); background-size:cover; background-position:center; display:flex; align-items:flex-end; padding:16px; position:relative; }
+  .hero::after{ content:''; position:absolute; inset:0; background:linear-gradient(0deg, rgba(0,0,0,.75), rgba(0,0,0,.15)); }
+  .hero h2{ position:relative; z-index:1; }
+  h2{ font-size:20px; font-weight:800; margin:0; } h3{ font-size:14px; font-weight:700; margin:0 0 4px; }
+  p{ margin:0 0 8px; line-height:1.55; color:var(--text-muted); font-size:13.5px; }
+  .pad{ padding:16px; }
+  .info-row{ display:flex; gap:10px; align-items:center; margin-bottom:12px; }
+  .info-row svg{ width:19px; height:19px; color:var(--red); flex-shrink:0; }
+  .info-row .lbl{ font-size:11px; color:var(--text-faint); text-transform:uppercase; font-weight:700; letter-spacing:.3px; }
+  .info-row .val{ font-size:13.5px; font-weight:700; }
+  .performer-chip{ display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border-strong); border-radius:20px; padding:6px 12px; font-size:12.5px; font-weight:700; margin:0 6px 6px 0; }
+  .btn{ height:48px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; }
+  .btn:active{ transform:scale(.97); } .btn-primary{ background:var(--red); color:#fff; } .btn-going{ background:var(--green); color:#04210d; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:0; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="history.length>1?history.back():location.href='events.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1>Event Details</h1>
+    </div>
+    <div class="hero"><h2 id="ev-name">Event</h2></div>
+    <div class="pad">
+      <div class="info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><div><div class="lbl">Date &amp; Time</div><div class="val" id="ev-datetime">—</div></div></div>
+      <div class="info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg><div><div class="lbl">Location</div><div class="val" id="ev-loc">—</div></div></div>
+      <p id="ev-desc" style="margin-top:4px;">—</p>
+      <h3 style="margin-top:14px;">Performing</h3>
+      <div id="ev-performers" style="margin-bottom:18px;"></div>
+      <button class="btn btn-primary" id="attend-btn" onclick="toggleAttend()">Mark as Attending</button>
+    </div>
+  </div>
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctSetFan(patch){ const s = ctGetState(); s.fan = Object.assign({}, s.fan, patch); localStorage.setItem(CT_KEY, JSON.stringify(s)); }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 3200); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+const EVENTS = [
+  {id:'e1', name:'Underground Sundays', date:'2026-07-27', time:'8:00 PM', format:'In-Person', location:'The Basement, Los Angeles, CA', performers:['Nina Volkov','Deshawn Ruiz'], desc:'Weekly underground showcase. Adult material, 21+ room.'},
+  {id:'e2', name:'Open Mic Night', date:'2026-07-24', time:'7:30 PM', format:'Open Mic', location:'Coyote Room, Austin, TX', performers:['Priya Shah'], desc:'Sign up at the door. 5-minute sets, all levels welcome.'},
+  {id:'e3', name:'ComicTube Online Showcase', date:'2026-08-02', time:'9:00 PM', format:'Online', location:'ComicTube Live Room', performers:['Marcus Boone','Ollie Chen'], desc:'Streamed showcase, free for all fans to attend.'},
+  {id:'e4', name:'Roast Battle: Vol. 4', date:'2026-08-08', time:'9:30 PM', format:'In-Person', location:'The Cellar, Atlanta, GA', performers:['Deshawn Ruiz','Fatima Idris'], desc:'Two comedians. One stage. No mercy.'}
+];
+function getCustomEvents(){ try{ return JSON.parse(localStorage.getItem('ct_custom_events_v1')) || []; }catch(e){ return []; } }
+const ALL_EVENTS = [...EVENTS, ...getCustomEvents()];
+const params = new URLSearchParams(location.search);
+const ev = ALL_EVENTS.find(e=>e.id===(params.get('id')||'e1')) || ALL_EVENTS[0];
+
+function render(){
+  document.querySelector('.hero').style.backgroundImage = `url('https://picsum.photos/seed/${ev.id}/600/300')`;
+  document.getElementById('ev-name').textContent = ev.name;
+  const d = new Date(ev.date+'T00:00:00');
+  document.getElementById('ev-datetime').textContent = d.toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric'}) + ' · ' + ev.time;
+  document.getElementById('ev-loc').textContent = ev.location;
+  document.getElementById('ev-desc').textContent = ev.desc;
+  document.getElementById('ev-performers').innerHTML = ev.performers.map(p=>`<span class="performer-chip">${p}</span>`).join('');
+  const s = ctGetState();
+  const attending = s.fan.attending.includes(ev.id);
+  const btn = document.getElementById('attend-btn');
+  btn.textContent = attending ? "You're Attending" : 'Mark as Attending';
+  btn.className = 'btn ' + (attending ? 'btn-going' : 'btn-primary');
+}
+function toggleAttend(){
+  const s = ctGetState();
+  const attending = s.fan.attending.includes(ev.id);
+  ctSetFan({ attending: attending ? s.fan.attending.filter(x=>x!==ev.id) : [...s.fan.attending, ev.id] });
+  ctToast(attending ? 'Removed from your calendar.' : "You're attending! We'll remind you 1 hour before.", 'success');
+  render();
+}
+render();
+</script>
+</body>
+</html>

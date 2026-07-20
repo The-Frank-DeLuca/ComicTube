@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Edit Profile — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-toast:60; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; }
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:17px; font-weight:700; margin:0; flex:1; text-align:center; padding-right:40px; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  p{ margin:0 0 8px; line-height:1.5; color:var(--text-muted); font-size:13px; }
+  .pad{ padding:18px; }
+  .photo-row{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+  .photo-avatar{ width:76px; height:76px; border-radius:22px; background:var(--red); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:26px; color:#fff; position:relative; overflow:hidden; }
+  .avatar-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:1; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+  .field input, .field textarea{ width:100%; height:46px; border-radius:12px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); padding:0 14px; font-size:15px; font-family:inherit; }
+  .field textarea{ height:auto; padding:10px 14px; resize:vertical; line-height:1.5; }
+  .field input:focus, .field textarea:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-glow); }
+  .field .hint{ font-size:11.5px; color:var(--text-faint); margin-top:5px; }
+  .genre-grid{ display:flex; flex-wrap:wrap; gap:8px; }
+  .genre-chip{ padding:8px 14px; border-radius:20px; background:var(--surface-2); border:1px solid var(--border-strong); font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; }
+  .genre-chip.active{ background:var(--red); border-color:var(--red); color:#fff; }
+  .btn{ height:48px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; background:var(--red); color:#fff; }
+  .btn:active{ transform:scale(.97); }
+  .btn-outline{ background:var(--surface-2); color:var(--text); border:1px solid var(--border-strong); height:40px; border-radius:10px; font-size:12.5px; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:0; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="history.length>1?history.back():location.href='comedian-dashboard.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1>Edit Profile</h1>
+    </div>
+    <div class="pad">
+      <div class="photo-row">
+        <div class="photo-avatar" id="avatar">NV</div>
+        <button type="button" class="btn-outline" onclick="ctToast('Photo upload is a mock action in this prototype.','success')">Change Photo</button>
+      </div>
+
+      <form onsubmit="return save(event)">
+        <div class="field"><label>Stage name</label><input id="stage" value="Nina Volkov"></div>
+        <div class="row2" style="display:flex; gap:10px;">
+          <div class="field" style="flex:1;"><label>City</label><input id="city" value="Los Angeles"></div>
+          <div class="field" style="flex:1;"><label>State</label><input id="state" value="CA" maxlength="2"></div>
+        </div>
+        <div class="field">
+          <label>Genre tags (max 3)</label>
+          <div class="genre-grid" id="genre-grid"></div>
+        </div>
+        <div class="field"><label>Bio</label><textarea id="bio" rows="3" maxlength="280" oninput="updateCount()">Dry, deadpan sets about immigrant family chaos and late-capitalism dread.</textarea><div class="hint"><span id="bio-count">72</span>/280 characters</div></div>
+        <button class="btn" type="submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctSetComedian(patch){ const s = ctGetState(); s.comedian = Object.assign({}, s.comedian, patch); localStorage.setItem(CT_KEY, JSON.stringify(s)); }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 2600); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+const s = ctGetState();
+document.getElementById('avatar').innerHTML = s.comedian.stageName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() + '<img class="avatar-photo" src="https://i.pravatar.cc/200?img=47" alt="" onerror="this.remove()">';
+document.getElementById('stage').value = s.comedian.stageName;
+const cityState = s.comedian.city.split(', ');
+document.getElementById('city').value = cityState[0] || '';
+document.getElementById('state').value = cityState[1] || '';
+
+const genres = ['Stand-Up','Improv','Storytelling','Roast','Sketch','Other'];
+let selected = [s.comedian.genre];
+function renderGenres(){
+  document.getElementById('genre-grid').innerHTML = genres.map(g => `<div class="genre-chip ${selected.includes(g)?'active':''}" onclick="toggleGenre('${g}')">${g}</div>`).join('');
+}
+function toggleGenre(g){
+  if(selected.includes(g)){ selected = selected.filter(x=>x!==g); }
+  else{
+    if(selected.length >= 3){ ctToast('You can select a maximum of 3 genre tags.', 'error'); return; }
+    selected.push(g);
+  }
+  renderGenres();
+}
+renderGenres();
+
+function updateCount(){ document.getElementById('bio-count').textContent = document.getElementById('bio').value.length; }
+updateCount();
+
+function save(e){
+  e.preventDefault();
+  const stage = document.getElementById('stage').value.trim();
+  const city = document.getElementById('city').value.trim();
+  const state = document.getElementById('state').value.trim();
+  const bio = document.getElementById('bio').value.trim();
+  if(bio.length < 10){ ctToast('Bio must be at least 10 characters.', 'error'); return false; }
+  ctSetComedian({ stageName: stage, city: city+', '+state, genre: selected[0] || 'Other' });
+  ctToast('Profile updated successfully.', 'success');
+  return false;
+}
+</script>
+</body>
+</html>

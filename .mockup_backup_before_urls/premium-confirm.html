@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Welcome to Premium — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --green:#34C759; --amber:#FF9F0A; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .screen{ height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px; text-align:center; }
+  .check-wrap{ width:96px; height:96px; border-radius:50%; background:rgba(52,199,89,.15); display:flex; align-items:center; justify-content:center; margin-bottom:22px; animation:pop .35s ease; }
+  @keyframes pop{ from{ transform:scale(.7); opacity:0;} to{ transform:scale(1); opacity:1;} }
+  .check-wrap svg{ width:48px; height:48px; color:var(--green); }
+  h2{ font-size:23px; font-weight:800; margin:0 0 8px; }
+  p{ font-size:14px; color:var(--text-muted); line-height:1.6; max-width:270px; margin:0 auto 26px; }
+  .receipt{ width:100%; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; text-align:left; margin-bottom:24px; }
+  .receipt .row{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; color:var(--text-muted); }
+  .receipt .row:last-child{ margin-bottom:0; font-weight:700; color:var(--text); }
+  .btn{ height:48px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; background:var(--red); color:#fff; }
+  .btn:active{ transform:scale(.97); }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="screen">
+    <div class="check-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l5 5L20 7"/></svg></div>
+    <h2>Welcome to Premium</h2>
+    <p>Your subscription is active. Full-length content is unlocked across every comedian on ComicTube.</p>
+    <div class="receipt">
+      <div class="row"><span>Plan</span><span>ComicTube Premium</span></div>
+      <div class="row"><span>Billing</span><span>$6.99 / month</span></div>
+      <div class="row"><span>Next charge</span><span id="next-charge">—</span></div>
+      <div class="row"><span>Total</span><span>$6.99</span></div>
+    </div>
+    <button class="btn" onclick="location.href='discover.html'">Start Watching</button>
+  </div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctGetState(){ try{ return JSON.parse(localStorage.getItem(CT_KEY)); }catch(e){ return null; } }
+(function(){
+  const s = ctGetState();
+  const d = new Date(s && s.fan && s.fan.billingDate ? s.fan.billingDate : Date.now());
+  d.setMonth(d.getMonth()+1);
+  document.getElementById('next-charge').textContent = d.toLocaleDateString('en-US',{month:'long', day:'numeric', year:'numeric'});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Post — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-toast:60; --safe-bottom:env(safe-area-inset-bottom,0px); }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; display:flex; flex-direction:column; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; z-index:5; pointer-events:none;}
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; flex:1; overflow-y:auto; scrollbar-width:none; display:flex; flex-direction:column; min-height:0; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:16px; font-weight:700; margin:0; flex:1; text-align:center; padding-right:40px; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  .content-scroll{ flex:1; overflow-y:auto; padding:16px; }
+  .post-head{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .mini-avatar{ width:36px; height:36px; border-radius:11px; background:var(--red); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:13px; position:relative; overflow:hidden; }
+  .avatar-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:1; }
+  .post-title{ font-size:16px; font-weight:800; line-height:1.4; margin-bottom:14px; }
+  .reply{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:10px; }
+  .reply-head{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-faint); margin-bottom:5px; }
+  .reply p{ margin:0; font-size:13.5px; color:var(--text); line-height:1.5; }
+  .sec-label{ font-size:11.5px; font-weight:800; color:var(--text-faint); text-transform:uppercase; letter-spacing:.5px; margin:18px 0 10px; }
+  .composer{ position:sticky; bottom:0; background:var(--surface); border-top:1px solid var(--border); padding:10px 14px calc(10px + var(--safe-bottom)); display:flex; gap:8px; }
+  .composer input{ flex:1; height:42px; border-radius:12px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); padding:0 14px; font-size:14px; font-family:inherit; }
+  .composer input:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-glow); }
+  .send-btn{ width:42px; height:42px; border-radius:12px; background:var(--red); border:none; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+  .send-btn:active{ transform:scale(.94); }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:70px; z-index:60; display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--green); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; color:var(--green); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="history.length>1?history.back():location.href='https://comictube.app/community'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1>Post</h1>
+    </div>
+    <div class="content-scroll">
+      <div class="post-head">
+        <div class="mini-avatar" id="author-avatar">MB</div>
+        <div><div style="font-weight:700; font-size:13.5px;" id="author-name">—</div><div style="font-size:11.5px; color:var(--text-faint);" id="post-time">—</div></div>
+      </div>
+      <div class="post-title" id="post-title">—</div>
+
+      <div class="sec-label" id="reply-count">Replies</div>
+      <div id="reply-list"></div>
+    </div>
+    <div class="composer">
+      <input id="reply-input" placeholder="Write a reply…">
+      <button class="send-btn" onclick="sendReply()" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 11l18-8-8 18-2.5-7.5z"/></svg></button>
+    </div>
+  </div>
+  <div id="toast-wrap"></div>
+</div>
+<script>
+function ctToast(message){ const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const el = document.createElement('div'); el.className = 'toast'; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/></svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 2600); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+const POSTS = {
+  p1:{author:'Marcus Boone', time:'2h ago', title:'Anyone else bombing at 8pm slots lately?', replies:[
+    {author:'Priya Shah', time:'1h ago', text:"8pm crowds are half-cut and half-checked-out. I've had better luck at 9:30."},
+    {author:'Ollie Chen', time:'45m ago', text:'Same. Switched my whole opener for those slots.'}
+  ]},
+  p2:{author:'Priya Shah', time:'5h ago', title:'Looking for a 2-person act for Austin showcase', replies:[
+    {author:'Deshawn Ruiz', time:'3h ago', text:"I'm in Atlanta but I know a guy in Austin, I'll send his info."}
+  ]},
+  p3:{author:'Ollie Chen', time:'1d ago', title:'New 5 min bit — roast it', replies:[
+    {author:'Nina Volkov', time:'20h ago', text:'The DMV bit is strong. Cut the second minute, it drags.'},
+    {author:'Fatima Idris', time:'18h ago', text:'Agreed, punch up the ending.'}
+  ]},
+  p4:{author:'ComicTube Team', time:'2d ago', title:'Payout schedule confirmed for August', replies:[]},
+  p5:{author:'Fatima Idris', time:'3d ago', title:'Best open mic rooms in Brooklyn right now?', replies:[
+    {author:'Marcus Boone', time:'2d ago', text:'Coyote Room if you can get a slot. Fills up fast.'}
+  ]}
+};
+function initials(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+const AUTHOR_IMG = { 'Nina Volkov':47, 'Marcus Boone':13, 'Priya Shah':44, 'Deshawn Ruiz':14, 'Ollie Chen':15, 'Fatima Idris':48 };
+function authorPhoto(name){ return AUTHOR_IMG[name] ? `<img class="avatar-photo" src="https://i.pravatar.cc/150?img=${AUTHOR_IMG[name]}" alt="" onerror="this.remove()">` : ''; }
+const id = new URLSearchParams(location.search).get('id') || 'p1';
+const post = POSTS[id] || POSTS.p1;
+
+function render(){
+  document.getElementById('author-avatar').innerHTML = initials(post.author) + authorPhoto(post.author);
+  document.getElementById('author-name').textContent = post.author;
+  document.getElementById('post-time').textContent = post.time;
+  document.getElementById('post-title').textContent = post.title;
+  document.getElementById('reply-count').textContent = post.replies.length + ' Replies';
+  const list = document.getElementById('reply-list');
+  if(!post.replies.length){ list.innerHTML = '<p style="color:var(--text-faint); font-size:13px;">No replies yet. Be the first.</p>'; return; }
+  list.innerHTML = post.replies.map(r => `
+    <div class="reply"><div class="reply-head"><span>${r.author}</span><span>${r.time}</span></div><p>${r.text}</p></div>
+  `).join('');
+}
+function sendReply(){
+  const input = document.getElementById('reply-input');
+  const text = input.value.trim();
+  if(!text) return;
+  post.replies.push({ author:'You', time:'Just now', text });
+  input.value = '';
+  render();
+  ctToast('Reply posted.');
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Comedian Sign Up — ComicTube</title>
+<style>
+  :root{ --bg:#0C0C0D; --surface:#1A1A1A; --surface-2:#242426; --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16); --text:#F5F5F7; --text-muted:#9A9AA2; --text-faint:#68686F; --red:#CC0000; --red-glow:rgba(204,0,0,.35); --green:#34C759; --amber:#FF9F0A; --danger:#FF453A; --blue:#0A84FF; --radius:14px; --shadow:0 12px 28px rgba(0,0,0,.45); --z-sticky:20; --z-toast:60; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;} html,body{margin:0;padding:0;}
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--text); min-height:100dvh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 20% 15%, rgba(204,0,0,.16), transparent 45%), radial-gradient(circle at 80% 85%, rgba(204,0,0,.10), transparent 40%), #050505; }
+  a{color:inherit; text-decoration:none;} button{font-family:inherit;}
+  .device{ position:relative; width:100%; height:100dvh; max-width:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:760px){ .device{ width:390px; height:844px; max-height:92vh; border-radius:46px; border:10px solid #111214; box-shadow:var(--shadow), 0 0 0 1px rgba(255,255,255,.04);} }
+  .statusbar{ display:none; position:absolute; top:0; left:0; right:0; height:44px; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:14px; font-weight:600; }
+  @media (min-width:760px){ .statusbar{ display:flex; } .screen{ padding-top:44px; } }
+  .statusbar .dot{display:flex; gap:4px; align-items:flex-end;} .statusbar .sig{width:3px; background:#fff; border-radius:1px;}
+  .statusbar .sig:nth-child(1){height:5px;} .statusbar .sig:nth-child(2){height:7px;} .statusbar .sig:nth-child(3){height:9px;} .statusbar .sig:nth-child(4){height:11px;}
+  .screen{ position:relative; height:100%; overflow-y:auto; scrollbar-width:none; }
+  .screen::-webkit-scrollbar{ display:none; }
+  .topbar{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; align-items:center; gap:10px; height:56px; padding:0 8px; background:rgba(12,12,13,.86); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .topbar h1{ font-size:16px; font-weight:700; margin:0; flex:1; text-align:center; padding-right:40px; }
+  .iconbtn{ width:40px; height:40px; min-width:40px; border-radius:50%; border:none; background:transparent; color:var(--text); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .iconbtn:active{ transform:scale(.92); }
+  h2{ font-size:20px; font-weight:800; margin:0 0 4px;} h3{font-size:14px;font-weight:700;margin:0;}
+  p{ margin:0 0 8px; line-height:1.55; color:var(--text-muted); font-size:13.5px; }
+  .pad{ padding:16px; }
+  .field{ margin-bottom:15px; }
+  .field label{ display:block; font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
+  .field input, .field select, .field textarea{ width:100%; height:46px; border-radius:12px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--text); padding:0 14px; font-size:15px; font-family:inherit; }
+  .field textarea{ height:auto; padding:10px 14px; resize:vertical; line-height:1.5; }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-glow); }
+  .field .hint{ font-size:11.5px; color:var(--text-faint); margin-top:5px; }
+  .field .err-msg{ font-size:12px; color:var(--danger); margin-top:5px; display:none; font-weight:600; }
+  .field.error input, .field.error textarea, .field.error select{ border-color:var(--danger); } .field.error .err-msg{ display:block; }
+  .row2{ display:flex; gap:10px; } .row2 .field{ flex:1; }
+  .genre-grid{ display:flex; flex-wrap:wrap; gap:8px; }
+  .genre-chip{ padding:8px 14px; border-radius:20px; background:var(--surface-2); border:1px solid var(--border-strong); font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; }
+  .genre-chip.active{ background:var(--red); border-color:var(--red); color:#fff; }
+  .stripe-connect{ display:flex; align-items:center; justify-content:space-between; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:16px; }
+  .stripe-connect .left{ display:flex; gap:10px; align-items:center; }
+  .stripe-connect svg{ width:22px; height:22px; color:var(--amber); }
+  .btn-sm{ height:38px; padding:0 14px; border-radius:10px; border:none; font-weight:700; font-size:12.5px; cursor:pointer; background:var(--surface-2); border:1px solid var(--border-strong); color:var(--text); }
+  .btn-sm.connected{ background:rgba(52,199,89,.15); border-color:var(--green); color:var(--green); }
+  .checkrow{ display:flex; gap:10px; align-items:flex-start; font-size:12px; color:var(--text-muted); margin-bottom:12px; }
+  .checkrow input{ margin-top:2px; width:18px; height:18px; accent-color:var(--red); flex-shrink:0; }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:48px; border-radius:var(--radius); border:none; font-size:15px; font-weight:700; cursor:pointer; width:100%; }
+  .btn:active{ transform:scale(.97); } .btn-primary{ background:var(--red); color:#fff; } .btn[disabled]{ opacity:.6; pointer-events:none; }
+  #toast-wrap{ position:absolute; left:0; right:0; bottom:0; z-index:var(--z-toast); display:flex; flex-direction:column; align-items:center; gap:8px; padding:0 16px 16px; pointer-events:none; }
+  .toast{ pointer-events:auto; max-width:340px; width:100%; display:flex; gap:10px; align-items:flex-start; background:#1E1E20; border:1px solid var(--border-strong); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); animation:toast-in .25s ease; border-left:4px solid var(--blue); }
+  .toast.success{ border-left-color:var(--green); } .toast.error{ border-left-color:var(--danger); }
+  .toast svg{ width:20px; height:20px; flex-shrink:0; margin-top:1px; } .toast.success svg{ color:var(--green); } .toast.error svg{ color:var(--danger); }
+  .toast .msg{ font-size:13px; line-height:1.4; color:var(--text); font-weight:600; }
+  @keyframes toast-in{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span id="clock">9:41</span><div class="dot"><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div></div></div>
+  <div class="screen">
+    <div class="topbar">
+      <button class="iconbtn" onclick="location.href='login.html'" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1>Comedian Sign Up</h1>
+    </div>
+    <div class="pad">
+      <h2>Build your stage</h2>
+      <p>Upload sets, go live, and earn from your first subscriber. No follower minimum.</p>
+
+      <form onsubmit="return doRegister(event)">
+        <div class="field" id="f-email"><label>Email address</label><input id="email" type="email" value="nina@example.com"><div class="err-msg">Enter a valid email address.</div></div>
+        <div class="field" id="f-pass"><label>Password</label><input id="pass" type="password" value="demopass1"><div class="err-msg">Password must be at least 8 characters and include a number.</div></div>
+        <div class="field" id="f-stage"><label>Stage name</label><input id="stage" value="Nina Volkov"><div class="hint">Your public comedian name on ComicTube.</div><div class="err-msg">Stage name is required.</div></div>
+        <div class="row2">
+          <div class="field" id="f-city"><label>City</label><input id="city" value="Los Angeles"></div>
+          <div class="field" id="f-state"><label>State</label><input id="state" value="CA" maxlength="2"></div>
+        </div>
+        <div class="field">
+          <label>Primary genre</label>
+          <div class="genre-grid" id="genre-grid"></div>
+        </div>
+        <div class="field" id="f-bio"><label>Short bio</label><textarea id="bio" rows="3" maxlength="280" oninput="updateBioCount()">Dry, deadpan sets about immigrant family chaos and late-capitalism dread.</textarea><div class="hint"><span id="bio-count">72</span>/280 characters</div><div class="err-msg">Bio must be 10–280 characters.</div></div>
+        <div class="field" id="f-dob"><label>Date of birth</label><input id="dob" type="date" value="1994-02-20"><div class="hint">Comedians must be 18 or older to register.</div><div class="err-msg">You must be 18 or older to register as a comedian.</div></div>
+
+        <div class="stripe-connect">
+          <div class="left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <div><h3>Stripe Express Payouts</h3><p style="margin:0; font-size:11.5px;">Optional now — required before your first payout.</p></div>
+          </div>
+          <button type="button" class="btn-sm" id="stripe-btn" onclick="connectStripe()">Connect</button>
+        </div>
+
+        <div class="checkrow"><input type="checkbox" id="tos" checked><label>I agree to the <a style="color:var(--red);font-weight:700;" href="../legal/terms.html" target="_blank">Terms of Service</a>.</label></div>
+        <div class="checkrow"><input type="checkbox" id="rsa" checked><label>I agree to the Revenue Share Agreement (80% comedian / 20% platform).</label></div>
+
+        <button class="btn btn-primary" type="submit" id="reg-btn">Create Comedian Account</button>
+      </form>
+    </div>
+  </div>
+  <div id="toast-wrap"></div>
+</div>
+<script>
+const CT_KEY = 'ct_state_v1';
+function ctDefaultState(){ return { role:null, fan:{name:'Jordan Ellis',email:'jordan.ellis@example.com',membershipTier:'Free',contentMode:'Adult',dob:'1998-04-12',followed:['c1','c3'],saved:['c2'],lastViewedComedian:'c1',billingDate:null,attending:[]}, comedian:{id:'c1',stageName:'Nina Volkov',email:'nina@example.com',genre:'Stand-Up',city:'Los Angeles, CA',dob:'1994-02-20',earningsActive:false,stripeConnected:false,monetizationUnlocked:false} }; }
+function ctGetState(){ try{ const raw = localStorage.getItem(CT_KEY); if(!raw) throw 0; return Object.assign(ctDefaultState(), JSON.parse(raw)); }catch(e){ const d = ctDefaultState(); localStorage.setItem(CT_KEY, JSON.stringify(d)); return d; } }
+function ctSetState(patch){ const cur = ctGetState(); const next = Object.assign({}, cur, patch); localStorage.setItem(CT_KEY, JSON.stringify(next)); return next; }
+function ctSetComedian(patch){ const s = ctGetState(); s.comedian = Object.assign({}, s.comedian, patch); ctSetState(s); }
+function ctToast(message, type){ type = type || 'success'; const wrap = document.getElementById('toast-wrap'); if(!wrap) return; const icons = { success:'<path d="M8 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9"/>', error:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>' }; const el = document.createElement('div'); el.className = 'toast ' + type; el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+icons[type]+'</svg><div class="msg">'+message+'</div>'; wrap.appendChild(el); setTimeout(()=>{ el.style.transition='opacity .25s ease, transform .25s ease'; el.style.opacity='0'; el.style.transform='translateY(8px)'; setTimeout(()=>el.remove(),260); }, 3000); }
+function ctClock(){ const el = document.getElementById('clock'); if(!el) return; const d = new Date(); let h = d.getHours(); const m = d.getMinutes().toString().padStart(2,'0'); h = h%12; if(h===0) h=12; el.textContent = h+':'+m; }
+ctClock(); setInterval(ctClock, 15000);
+
+const genres = ['Stand-Up','Improv','Storytelling','Roast','Sketch','Other'];
+let selectedGenre = 'Stand-Up';
+function renderGenres(){
+  document.getElementById('genre-grid').innerHTML = genres.map(g => `<div class="genre-chip ${g===selectedGenre?'active':''}" onclick="pickGenre('${g}')">${g}</div>`).join('');
+}
+function pickGenre(g){ selectedGenre = g; renderGenres(); }
+renderGenres();
+
+function updateBioCount(){ document.getElementById('bio-count').textContent = document.getElementById('bio').value.length; }
+updateBioCount();
+
+let stripeConnected = false;
+function connectStripe(){
+  const btn = document.getElementById('stripe-btn');
+  if(stripeConnected){ return; }
+  btn.textContent = 'Connecting…';
+  setTimeout(()=>{
+    stripeConnected = true;
+    btn.textContent = 'Connected ✓'; btn.classList.add('connected');
+    ctToast('Stripe Express account connected.', 'success');
+  }, 700);
+}
+
+function calcAge(dobStr){ const dob = new Date(dobStr); const now = new Date(); let age = now.getFullYear()-dob.getFullYear(); const m = now.getMonth()-dob.getMonth(); if(m<0 || (m===0 && now.getDate()<dob.getDate())) age--; return age; }
+function clearErrors(){ ['f-email','f-pass','f-stage','f-bio','f-dob'].forEach(id=>document.getElementById(id).classList.remove('error')); }
+
+function doRegister(e){
+  e.preventDefault();
+  clearErrors();
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  const stage = document.getElementById('stage').value.trim();
+  const bio = document.getElementById('bio').value.trim();
+  const dob = document.getElementById('dob').value;
+  const city = document.getElementById('city').value.trim();
+  const state = document.getElementById('state').value.trim();
+  let hasError = false;
+
+  if(!email.includes('@')){ document.getElementById('f-email').classList.add('error'); hasError = true; }
+  if(pass.length < 8 || !/[0-9]/.test(pass)){ document.getElementById('f-pass').classList.add('error'); hasError = true; }
+  if(!stage){ document.getElementById('f-stage').classList.add('error'); hasError = true; }
+  if(bio.length < 10 || bio.length > 280){ document.getElementById('f-bio').classList.add('error'); hasError = true; }
+  if(!dob || calcAge(dob) < 18){ document.getElementById('f-dob').classList.add('error'); hasError = true; }
+
+  if(hasError){ ctToast('Please fix the highlighted fields.', 'error'); return false; }
+  if(!document.getElementById('tos').checked || !document.getElementById('rsa').checked){
+    ctToast('You must accept the Terms of Service and Revenue Share Agreement.', 'error'); return false;
+  }
+
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  setTimeout(()=>{
+    ctSetComedian({ id:'c1', stageName: stage, email, genre: selectedGenre, city: city+', '+state, dob, stripeConnected, earningsActive: stripeConnected });
+    ctSetState({ role:'comedian' });
+    ctToast('Comedian account created! Welcome to ComicTube.', 'success');
+    setTimeout(()=>location.href='comedian-dashboard.html', 700);
+  }, 550);
+  return false;
+}
+</script>
+</body>
+</html>
